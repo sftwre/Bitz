@@ -1,4 +1,4 @@
-package com.bitz.isaacbuitrago.bitz;
+package com.bitz.isaacbuitrago.bitz.Activities;
 
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -6,10 +6,18 @@ import android.support.design.widget.BottomNavigationView;
 import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
 import android.widget.TextView;
+import java.time.Duration;
+import java.util.Timer;
+import java.util.TimerTask;
+
+import com.bitz.isaacbuitrago.bitz.Model.Bit;
+import com.bitz.isaacbuitrago.bitz.R;
 
 public class Create_Bit extends AppCompatActivity {
 
-    private TextView mTextMessage;
+    private TextView timePlayed;
+
+    private Bit bit;
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
             = new BottomNavigationView.OnNavigationItemSelectedListener() {
@@ -18,13 +26,14 @@ public class Create_Bit extends AppCompatActivity {
         public boolean onNavigationItemSelected(@NonNull MenuItem item) {
             switch (item.getItemId()) {
                 case R.id.navigation_skip_previous:
-                    mTextMessage.setText(R.string.title_home);
+                    timePlayed.setText(R.string.title_home);
                     return true;
                 case R.id.navigation_skip_next:
-                    mTextMessage.setText(R.string.title_dashboard);
+                    timePlayed.setText(R.string.title_dashboard);
                     return true;
-                case R.id.navigation_play:
-                    mTextMessage.setText(R.string.title_notifications);
+                case R.id.navigation_bit:
+                    timePlayed.setText("Bit");
+                    
                     return true;
             }
             return false;
@@ -33,12 +42,17 @@ public class Create_Bit extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_create__bit);
 
-        mTextMessage = (TextView) findViewById(R.id.message);
+        timePlayed = (TextView) findViewById(R.id.message);
+
         BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.navigation);
+
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
+
     }
 
 }
