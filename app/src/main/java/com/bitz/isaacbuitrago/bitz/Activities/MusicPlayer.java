@@ -13,7 +13,7 @@ import java.util.TimerTask;
 import com.bitz.isaacbuitrago.bitz.Model.Bit;
 import com.bitz.isaacbuitrago.bitz.R;
 
-public class Create_Bit extends AppCompatActivity {
+public class MusicPlayer extends AppCompatActivity {
 
     private TextView timePlayed;
 
@@ -33,7 +33,7 @@ public class Create_Bit extends AppCompatActivity {
                     return true;
                 case R.id.navigation_bit:
                     timePlayed.setText("Bit");
-                    
+
                     return true;
             }
             return false;

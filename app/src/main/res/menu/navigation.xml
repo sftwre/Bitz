@@ -7,7 +7,7 @@
         android:title="" />
 
     <item
-        android:id="@+id/navigation_play"
+        android:id="@+id/navigation_bit"
         android:icon="@drawable/ic_vinyl_36dp"
         android:title="" />
 
