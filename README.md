@@ -1,2 +1,2 @@
 # Bitz
-Android app to help people communicate with music
+Android app that offers an easier and funner way of recommending music to friends.
