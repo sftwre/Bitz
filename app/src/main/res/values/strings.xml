@@ -19,4 +19,5 @@
         completions."
     </string>
     <string name="title_activity_music_library">MusicLibrary</string>
+    <string name="search_hint">Search for a song or artist</string>
 </resources>
