@@ -31,16 +31,9 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.List;
 import com.bitz.isaacbuitrago.bitz.R;
-
-import com.spotify.android.appremote.api.ConnectionParams;
-import com.spotify.android.appremote.api.Connector;
-import com.spotify.android.appremote.api.SpotifyAppRemote;
-import com.spotify.protocol.client.Subscription;
-import com.spotify.protocol.types.Capabilities;
-import com.spotify.protocol.types.PlayerState;
-import com.spotify.protocol.types.Track;
-
-
+import com.spotify.sdk.android.authentication.AuthenticationClient;
+import com.spotify.sdk.android.authentication.AuthenticationRequest;
+import com.spotify.sdk.android.authentication.AuthenticationResponse;
 
 
 import static android.Manifest.permission.READ_CONTACTS;
@@ -57,9 +50,12 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
      * Id to identity READ_CONTACTS permission request.
      */
     private static final int REQUEST_READ_CONTACTS = 0;
+    private static final int REQUEST_CODE = 1337;
+    private static final String REDIRECT_URI = "http://acm-utsa.org/members/electrolove/";
+    private static final String CLIENT_ID = "53845a988d744ff98262bbd027bfa2c7";
 
 
-
+    // TODO: Organize Manifest file
     /**
      * A dummy authentication store containing known user names and passwords.
      * TODO: remove after connecting to a real authentication system.
@@ -122,6 +118,13 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
     }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+        spotifyLogin();
+    }
+
 
     @Override
     protected void onStop()
@@ -129,26 +132,51 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         super.onStop();
     }
 
-//    /**
-//     * Configure the Google Sign In to access the Goolge API client
-//     */
-//    private void configureGoogleSignIn()
-//    {
-//        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-//                .requestEmail()
-//                .build();
-//
-//        client = GoogleSignIn.getClient(this, gso);
-//    }
-
 
     /**
      * Starts the sign in intent
      */
-    private void googleLogin()
+    private void spotifyLogin()
     {
-        //Intent signInIntent = client.getSignInIntent();
+        AuthenticationRequest.Builder builder =
+                new AuthenticationRequest.Builder(CLIENT_ID, AuthenticationResponse.Type.TOKEN, REDIRECT_URI);
+
+        builder.setScopes(new String[]{"streaming"});
+        AuthenticationRequest request = builder.build();
+
+        AuthenticationClient.openLoginActivity(this, REQUEST_CODE, request);
     }
+
+    protected void onActivityResult(int requestCode, int resultCode, Intent intent)
+    {
+        super.onActivityResult(requestCode, resultCode, intent);
+
+        // Check if result comes from the correct activity
+        if (requestCode == REQUEST_CODE)
+        {
+            AuthenticationResponse response = AuthenticationClient.getResponse(resultCode, intent);
+
+            switch (response.getType()) {
+                // Response was successful and contains auth token
+                case TOKEN:
+                    String message = String.format("Recieved token : %s", response.getCode());
+
+                    Log.i("LoginActivity", message);
+                    break;
+
+                // Auth flow returned an error
+                case ERROR:
+                    Log.e("LoginActivity", response.getError());
+
+                    break;
+
+                // Most likely auth flow was cancelled
+                default:
+                    Log.d("LoginActivity", response.getState());
+            }
+        }
+    }
+
 
     private void populateAutoComplete() {
         if (!mayRequestContacts()) {

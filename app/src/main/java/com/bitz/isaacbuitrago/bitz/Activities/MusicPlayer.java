@@ -70,40 +70,42 @@ public class MusicPlayer extends AppCompatActivity
     {
         super.onStart();
 
-        // Set the connection parameters
-        ConnectionParams connectionParams = new ConnectionParams.Builder(CLIENT_ID)
-                .setRedirectUri(REDIRECT_URI)
-                .showAuthView(true)
-                .build();
-
-        Log.i("LoginActivity", "Set connection params for spotify");
-
-        // Connect to Spotify
-        SpotifyAppRemote.CONNECTOR.connect(this, connectionParams,
-                new Connector.ConnectionListener()
-                {
-
-                    @Override
-                    public void onConnected(SpotifyAppRemote spotifyAppRemote)
-                    {
-                        mSpotifyAppRemote = spotifyAppRemote;
-
-                        Log.d("MainActivity", "Connected to Spotify");
-
-                        // start interacting with App Remote
-                        spotifyConnected();
-                    }
-
-                    @Override
-                    public void onFailure(Throwable throwable) {
-                        Log.e("MainActivity", throwable.getMessage(), throwable);
-
-                    }
-                });
-
-        Log.i("LoginActivity", "Connected to spotify");
+//        // Set the connection parameters
+//        ConnectionParams connectionParams = new ConnectionParams.Builder(CLIENT_ID)
+//                .setRedirectUri(REDIRECT_URI)
+//                .showAuthView(true)
+//                .build();
+//
+//        Log.i("LoginActivity", "Set connection params for spotify");
+//
+//        // Connect to Spotify
+//        SpotifyAppRemote.CONNECTOR.connect(this, connectionParams,
+//                new Connector.ConnectionListener()
+//                {
+//
+//                    @Override
+//                    public void onConnected(SpotifyAppRemote spotifyAppRemote)
+//                    {
+//                        mSpotifyAppRemote = spotifyAppRemote;
+//
+//                        Log.d("MainActivity", "Connected to Spotify");
+//
+//                        // start interacting with App Remote
+//                        spotifyConnected();
+//                    }
+//
+//                    @Override
+//                    public void onFailure(Throwable throwable) {
+//                        Log.e("MainActivity", throwable.getMessage(), throwable);
+//
+//                    }
+//                });
+//
+//        Log.i("LoginActivity", "Connected to spotify");
 
     }
+
+
 
 
     @Override
