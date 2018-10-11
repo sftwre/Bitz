@@ -9,17 +9,16 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.app.LoaderManager.LoaderCallbacks;
-
 import android.content.CursorLoader;
 import android.content.Loader;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
-
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -29,28 +28,37 @@ import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
-
 import java.util.ArrayList;
 import java.util.List;
-
 import com.bitz.isaacbuitrago.bitz.R;
-import com.google.android.gms.auth.api.signin.GoogleSignIn;
-import com.google.android.gms.auth.api.signin.GoogleSignInClient;
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+
+import com.spotify.android.appremote.api.ConnectionParams;
+import com.spotify.android.appremote.api.Connector;
+import com.spotify.android.appremote.api.SpotifyAppRemote;
+import com.spotify.protocol.client.Subscription;
+import com.spotify.protocol.types.Capabilities;
+import com.spotify.protocol.types.PlayerState;
+import com.spotify.protocol.types.Track;
+
+
+
 
 import static android.Manifest.permission.READ_CONTACTS;
 
 /**
  * A login screen that offers login via email/password.
+ *
+ * @author isaacbuitrago
  */
-public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<Cursor> {
+public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<Cursor>
+{
 
     /**
      * Id to identity READ_CONTACTS permission request.
      */
     private static final int REQUEST_READ_CONTACTS = 0;
 
-    private GoogleSignInClient client;
+
 
     /**
      * A dummy authentication store containing known user names and passwords.
@@ -70,12 +78,21 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     private View mProgressView;
     private View mLoginFormView;
 
+    /**
+     * Entry point for application
+     *
+     * @param savedInstanceState saved state of the activity
+     */
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState)
+    {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_login);
+
         // Set up the login form.
         mEmailView = (AutoCompleteTextView) findViewById(R.id.email);
+
         populateAutoComplete();
 
         mPasswordView = (EditText) findViewById(R.id.password);
@@ -98,40 +115,39 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             }
         });
 
-        Button googleSignInButton = (Button) findViewById(R.id.google_sign_in);
-
-        googleSignInButton.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                googleLogin();
-            }
-        });
 
         mLoginFormView = findViewById(R.id.login_form);
+
         mProgressView = findViewById(R.id.login_progress);
 
-        configureGoogleSignIn();
     }
 
-    /**
-     * Configure the Google Sign In to access the Goolge API client
-     */
-    private void configureGoogleSignIn()
+
+    @Override
+    protected void onStop()
     {
-        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestEmail()
-                .build();
-
-        client = GoogleSignIn.getClient(this, gso);
+        super.onStop();
     }
+
+//    /**
+//     * Configure the Google Sign In to access the Goolge API client
+//     */
+//    private void configureGoogleSignIn()
+//    {
+//        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+//                .requestEmail()
+//                .build();
+//
+//        client = GoogleSignIn.getClient(this, gso);
+//    }
+
 
     /**
      * Starts the sign in intent
      */
     private void googleLogin()
     {
-        Intent signInIntent = client.getSignInIntent();
+        //Intent signInIntent = client.getSignInIntent();
     }
 
     private void populateAutoComplete() {
@@ -183,7 +199,8 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
      * If there are form errors (invalid email, missing fields, etc.), the
      * errors are presented and no actual login attempt is made.
      */
-    private void attemptLogin() {
+    private void attemptLogin()
+    {
         if (mAuthTask != null) {
             return;
         }
@@ -309,6 +326,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     public void onLoaderReset(Loader<Cursor> cursorLoader) {
 
     }
+
 
     private void addEmailsToAutoComplete(List<String> emailAddressCollection) {
         //Create adapter to tell the AutoCompleteTextView what to show in its dropdown list.

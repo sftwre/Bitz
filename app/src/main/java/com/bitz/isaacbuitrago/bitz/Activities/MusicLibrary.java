@@ -12,7 +12,8 @@ import com.bitz.isaacbuitrago.bitz.R;
 public class MusicLibrary extends AppCompatActivity {
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState)
+    {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_music_library);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
