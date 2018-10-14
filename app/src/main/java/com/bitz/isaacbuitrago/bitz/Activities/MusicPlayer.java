@@ -8,6 +8,7 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.widget.TextView;
 
+import com.bitz.isaacbuitrago.bitz.Application.Properties;
 import com.bitz.isaacbuitrago.bitz.Model.Bit;
 import com.bitz.isaacbuitrago.bitz.R;
 import com.spotify.android.appremote.api.ConnectionParams;
@@ -16,18 +17,24 @@ import com.spotify.android.appremote.api.SpotifyAppRemote;
 import com.spotify.protocol.client.Subscription;
 import com.spotify.protocol.types.PlayerState;
 import com.spotify.protocol.types.Track;
+import java.net.HttpURLConnection;
+import java.net.URL;
 
+/**
+ * Responsible for playing a specified track and managing
+ * other events involved in creating a Bit.
+ *
+ * @author isaacbuitrago
+ */
 public class MusicPlayer extends AppCompatActivity
 {
     private TextView timePlayed;
 
-    private Bit bit;
-
-    private static final String CLIENT_ID = "53845a988d744ff98262bbd027bfa2c7";
-
-    private static final String REDIRECT_URI = "http://acm-utsa.org/members/electrolove/";
-
     private SpotifyAppRemote mSpotifyAppRemote;
+
+    private URL apiRequest;
+
+    private MusicSearcher musicSearcher;
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
             = new BottomNavigationView.OnNavigationItemSelectedListener() {
@@ -62,6 +69,8 @@ public class MusicPlayer extends AppCompatActivity
         BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.navigation);
 
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
+
+        musicSearcher =  new MusicSearcher();
     }
 
 
@@ -70,38 +79,40 @@ public class MusicPlayer extends AppCompatActivity
     {
         super.onStart();
 
-//        // Set the connection parameters
-//        ConnectionParams connectionParams = new ConnectionParams.Builder(CLIENT_ID)
-//                .setRedirectUri(REDIRECT_URI)
-//                .showAuthView(true)
-//                .build();
-//
-//        Log.i("LoginActivity", "Set connection params for spotify");
-//
-//        // Connect to Spotify
-//        SpotifyAppRemote.CONNECTOR.connect(this, connectionParams,
-//                new Connector.ConnectionListener()
-//                {
-//
-//                    @Override
-//                    public void onConnected(SpotifyAppRemote spotifyAppRemote)
-//                    {
-//                        mSpotifyAppRemote = spotifyAppRemote;
-//
-//                        Log.d("MainActivity", "Connected to Spotify");
-//
-//                        // start interacting with App Remote
-//                        spotifyConnected();
-//                    }
-//
-//                    @Override
-//                    public void onFailure(Throwable throwable) {
-//                        Log.e("MainActivity", throwable.getMessage(), throwable);
-//
-//                    }
-//                });
-//
-//        Log.i("LoginActivity", "Connected to spotify");
+        // Set the connection parameters
+        ConnectionParams connectionParams = new ConnectionParams.Builder(Properties.CLIENT_ID)
+                .setRedirectUri(Properties.REDIRECT_URI)
+                .showAuthView(true)
+                .build();
+
+        Log.i("LoginActivity", "Set connection params for spotify");
+
+        // Connect to Spotify
+
+        SpotifyAppRemote.CONNECTOR.connect(this, connectionParams,
+                new Connector.ConnectionListener()
+                {
+
+                    @Override
+                    public void onConnected(SpotifyAppRemote spotifyAppRemote)
+                    {
+                        mSpotifyAppRemote = spotifyAppRemote;
+
+                        Log.d("MainActivity", "Connected to Spotify");
+
+                        // start interacting with App Remote
+                        spotifyConnected();
+                    }
+
+                    @Override
+                    public void onFailure(Throwable throwable)
+                    {
+                        Log.e("MainActivity", throwable.getMessage(), throwable);
+
+                    }
+                });
+
+        Log.i("LoginActivity", "Connected to spotify");
 
     }
 
@@ -109,7 +120,8 @@ public class MusicPlayer extends AppCompatActivity
 
 
     @Override
-    protected void onStop() {
+    protected void onStop()
+    {
         super.onStop();
 
         SpotifyAppRemote.CONNECTOR.disconnect(mSpotifyAppRemote);
@@ -122,7 +134,15 @@ public class MusicPlayer extends AppCompatActivity
      */
     private void spotifyConnected()
     {
+        // search for the track
+        musicSearcher.search("Harder");
+
+        // get the track image
+
+        // get the track media
+
         mSpotifyAppRemote.getPlayerApi().play("spotify:user:spotify:playlist:37i9dQZF1DX2sUQwD7tbmL");
+
 
         // Subscribe to PlayerState
         mSpotifyAppRemote.getPlayerApi()

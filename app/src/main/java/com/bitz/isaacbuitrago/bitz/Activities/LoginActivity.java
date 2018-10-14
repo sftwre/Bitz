@@ -31,6 +31,7 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.List;
 import com.bitz.isaacbuitrago.bitz.R;
+import com.bitz.isaacbuitrago.bitz.Application.Properties;
 import com.spotify.sdk.android.authentication.AuthenticationClient;
 import com.spotify.sdk.android.authentication.AuthenticationRequest;
 import com.spotify.sdk.android.authentication.AuthenticationResponse;
@@ -51,8 +52,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
      */
     private static final int REQUEST_READ_CONTACTS = 0;
     private static final int REQUEST_CODE = 1337;
-    private static final String REDIRECT_URI = "http://acm-utsa.org/members/electrolove/";
-    private static final String CLIENT_ID = "53845a988d744ff98262bbd027bfa2c7";
 
 
     // TODO: Organize Manifest file
@@ -139,7 +138,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     private void spotifyLogin()
     {
         AuthenticationRequest.Builder builder =
-                new AuthenticationRequest.Builder(CLIENT_ID, AuthenticationResponse.Type.TOKEN, REDIRECT_URI);
+                new AuthenticationRequest.Builder(Properties.CLIENT_ID, AuthenticationResponse.Type.TOKEN, Properties.REDIRECT_URI);
 
         builder.setScopes(new String[]{"streaming"});
         AuthenticationRequest request = builder.build();
@@ -147,6 +146,14 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         AuthenticationClient.openLoginActivity(this, REQUEST_CODE, request);
     }
 
+
+    /**
+     * Receives the authentication result
+     *
+     * @param requestCode
+     * @param resultCode
+     * @param intent
+     */
     protected void onActivityResult(int requestCode, int resultCode, Intent intent)
     {
         super.onActivityResult(requestCode, resultCode, intent);
@@ -156,10 +163,14 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         {
             AuthenticationResponse response = AuthenticationClient.getResponse(resultCode, intent);
 
-            switch (response.getType()) {
+            switch (response.getType())
+            {
                 // Response was successful and contains auth token
                 case TOKEN:
+
                     String message = String.format("Recieved token : %s", response.getCode());
+
+                    Properties.accessToken = response.getAccessToken();
 
                     Log.i("LoginActivity", message);
                     break;
