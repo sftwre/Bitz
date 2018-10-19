@@ -1,5 +1,6 @@
 package com.bitz.isaacbuitrago.bitz.Activities;
 
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
@@ -11,6 +12,7 @@ import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import com.bitz.isaacbuitrago.bitz.Application.Properties;
+import com.bitz.isaacbuitrago.bitz.Model.Bit;
 import com.bitz.isaacbuitrago.bitz.R;
 import com.spotify.android.appremote.api.ConnectionParams;
 import com.spotify.android.appremote.api.Connector;
@@ -36,9 +38,9 @@ public class MusicPlayer extends AppCompatActivity
 
     private PlayerApi playerApi;
 
-    private URL apiRequest;
+    public static PlayerState playerState;
 
-    private Track currentTrack;
+    private URL apiRequest;
 
     private SeekBar seekBar;
 
@@ -52,9 +54,9 @@ public class MusicPlayer extends AppCompatActivity
 
     private Handler handler;
 
-    private  Runnable runnable;
+    private Runnable runnable;
 
-    private long songDuration;
+    private Bit bit;
 
     private static final long SLEEP_TIME = 1000;
 
@@ -75,7 +77,20 @@ public class MusicPlayer extends AppCompatActivity
                     timePlayed.setText(R.string.title_dashboard);
                     return true;
                 case R.id.navigation_bit:
-                    timePlayed.setText("Bit");
+
+                    Log.i("MusicPlayer", "Bit started");
+
+                    if(playerState != null)
+                    {
+                        bit.setTime(playerState.playbackPosition);
+                    }
+                    else
+                    {
+                        // TODO make toast to display an error message
+                    }
+
+                    Log.i("MusicPlayer", String.valueOf(bit));
+
 
                     return true;
             }
@@ -83,21 +98,30 @@ public class MusicPlayer extends AppCompatActivity
         }
     };
 
+    /**
+     * Listener that responds to changes on the seek bar.
+     */
     private SeekBar.OnSeekBarChangeListener mOnSeekBarChangeListener =
 
             new SeekBar.OnSeekBarChangeListener() {
                 @Override
                 public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser)
                 {
+                    // seek the current track to the position
                     if(fromUser && playerApi != null)
                     {
                         playerApi.seekTo((long) progress);
                     }
                 }
 
+                /**
+                 * When the user starts moving the progress handler
+                 * @param seekBar
+                 */
                 @Override
                 public void onStartTrackingTouch(SeekBar seekBar)
                 {
+                    handler.removeCallbacks(runnable);
 
                 }
 
@@ -105,6 +129,7 @@ public class MusicPlayer extends AppCompatActivity
                 public void onStopTrackingTouch(SeekBar seekBar)
                 {
 
+                    handler.removeCallbacks(runnable);
                 }
             };
 
@@ -120,6 +145,8 @@ public class MusicPlayer extends AppCompatActivity
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_create_bit);
+
+        handler = new Handler();
 
         timePlayed = (TextView) findViewById(R.id.timePlayed);
 
@@ -147,13 +174,17 @@ public class MusicPlayer extends AppCompatActivity
     {
         super.onStart();
 
+        // create the Bit for the activity
+
+        bit = new Bit();
+
         // Set Spotify the connection parameters
         ConnectionParams connectionParams = new ConnectionParams.Builder(Properties.CLIENT_ID)
                 .setRedirectUri(Properties.REDIRECT_URI)
                 .showAuthView(true)
                 .build();
 
-        Log.i("LoginActivity", "Set connection params for spotify");
+        Log.i("LoginActivity", "Set connection params for Spotify");
 
         // Connect to Spotify
         SpotifyAppRemote.CONNECTOR.connect(this, connectionParams,
@@ -211,21 +242,21 @@ public class MusicPlayer extends AppCompatActivity
             {
                 final Track track = playerState.track;
 
+                MusicPlayer.playerState = playerState;
+
                 if (track != null)
                 {
-                    currentTrack = track;
-
                     // TODO make async
                     // set the image for the current track
-                    //renderImage(currentTrack.imageUri);
+                    // renderImage(currentTrack.imageUri);
 
                     // set upper range of the progress bar
-                    seekBar.setMax((int) currentTrack.duration);
+                    seekBar.setMax((int) track.duration);
 
                     // change the seek bar
                     changeSeekBar(playerState);
 
-                    // TODO make this dynamic
+                    // TODO make async
                     // set the time stamps
                     timePlayed.setText(String.format("0:00"));
 
@@ -250,7 +281,10 @@ public class MusicPlayer extends AppCompatActivity
      */
     private void changeSeekBar(final PlayerState playerState)
     {
-        seekBar.setProgress((int) 1000);
+        if(Build.VERSION.SDK_INT >= 24)
+        {
+            seekBar.setProgress((int) playerState.playbackPosition);
+        }
 
         if(!(playerState.isPaused))
         {
