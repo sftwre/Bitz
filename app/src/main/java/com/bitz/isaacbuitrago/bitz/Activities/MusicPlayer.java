@@ -73,24 +73,28 @@ public class MusicPlayer extends AppCompatActivity
                 case R.id.navigation_skip_previous:
                     timePlayed.setText(R.string.title_home);
                     return true;
+
                 case R.id.navigation_skip_next:
                     timePlayed.setText(R.string.title_dashboard);
                     return true;
-                case R.id.navigation_bit:
 
-                    Log.i("MusicPlayer", "Bit started");
+                /**
+                 * Handles interaction with the disk Button to create a Bit
+                 */
+                case R.id.navigation_bit:
 
                     if(playerState != null)
                     {
+                        bit.transitionState();
+
                         bit.setTime(playerState.playbackPosition);
                     }
                     else
                     {
-                        // TODO make toast to display an error message
+                        Log.e("MusicPlayer", "playerState is NULL");
                     }
 
                     Log.i("MusicPlayer", String.valueOf(bit));
-
 
                     return true;
             }
@@ -175,7 +179,6 @@ public class MusicPlayer extends AppCompatActivity
         super.onStart();
 
         // create the Bit for the activity
-
         bit = new Bit();
 
         // Set Spotify the connection parameters
@@ -235,7 +238,10 @@ public class MusicPlayer extends AppCompatActivity
         playerApi.play("spotify:user:spotify:playlist:37i9dQZF1DX2sUQwD7tbmL");
 
         // Subscribe to PlayerState
-        playerApi.subscribeToPlayerState().setEventCallback(new Subscription.EventCallback<PlayerState>() {
+        playerApi.subscribeToPlayerState().setEventCallback(new Subscription.EventCallback<PlayerState>()
+        {
+
+            // Called when the Subscription receives a new event
 
             @Override
             public void onEvent(PlayerState playerState)
@@ -281,11 +287,6 @@ public class MusicPlayer extends AppCompatActivity
      */
     private void changeSeekBar(final PlayerState playerState)
     {
-        if(Build.VERSION.SDK_INT >= 24)
-        {
-            seekBar.setProgress((int) playerState.playbackPosition);
-        }
-
         if(!(playerState.isPaused))
         {
             runnable = new Runnable()
@@ -293,7 +294,10 @@ public class MusicPlayer extends AppCompatActivity
                 @Override
                 public void run()
                 {
-                    changeSeekBar(playerState);
+                    if(Build.VERSION.SDK_INT >= 24)
+                    {
+                        seekBar.setProgress((int) playerState.playbackPosition);
+                    }
                 }
             };
 

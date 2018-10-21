@@ -1,14 +1,6 @@
 package com.bitz.isaacbuitrago.bitz.Model;
 
-/**
- * States of a Bit, either recording or stopped.
- */
- enum BitState{
-
-     STOPPED,
-
-    RECORDING
-};
+import java.util.HashMap;
 
 /**
  * Copyright Isaac Buitrago 2018, All rights reserved
@@ -17,9 +9,10 @@ package com.bitz.isaacbuitrago.bitz.Model;
  */
 public class Bit
 {
-    private long startTime;         // start time of the Bit
 
-    private long endTime;           // end time of the Bit
+    protected long startTime;       // start time of a Bit
+
+    protected long endTime;         // end time of a Bit
 
     private  String trackTitle;     // title of the Track
 
@@ -29,103 +22,126 @@ public class Bit
 
     private  String platform;       // streaming platform the track is on
 
-    private BitState state;         // Bit state
+    private BitState state;         // Bit state, either recording or stopped
+
+
+    // set the active Bit states in a Bit
+
+    private static HashMap<String, BitState> states =
+
+            new HashMap<String, BitState>();
 
 
     /**
-     * Constructor, creates a new Bit in the default stopped state
+     * Creates a new Bit in the default stopped state
      */
     public Bit()
     {
-        this.state = BitState.STOPPED;
+        this.state = new BitStopped();
+
+        // create the states for the Bit
+        initStates();
     }
 
     /**
      * Used to set a position of interest to the user.
-     * This can be either the starting or ending time of the Bit.
+     * This can either be the starting or ending time of the Bit.
      *
      * @param position in milliseconds of the user's favorite part of a track.
      */
     public void setTime(long position)
     {
-        transitionState();
-
-        if(state == BitState.STOPPED)
-            endTime = position;
-
-        else
-            startTime = position;
+        state.setTime(position);
     }
 
     /**
-     * Used to change the state of a Bit from Stopped to
-     * playing or vice versus.
+     * Used to transition the state of a Bit from
+     * Recording to Stopped and vice versus.
+     *
      */
-    private void transitionState()
+    public void transitionState()
     {
-        if(state == BitState.STOPPED)
-            state = BitState.RECORDING;
-
+        // Switch between Recording and Stopped
+        if(state instanceof BitRecording)
+        {
+            state = states.get("BitStopped");
+        }
         else
-            state = BitState.STOPPED;
+        {
+            // null
+            state = states.get("BitRecording");
+        }
+    }
+
+
+    /**
+     * Creates a Recording and Stopped State for the Bit
+     * if they are not already present.
+     */
+    private void initStates()
+    {
+        if((states.get("BitStopped")) == null)
+        {
+            states.put("BitStopped", new BitStopped());
+        }
+
+        if((states.get("BitRecording")) == null)
+        {
+            states.put("BitRecording", new BitRecording());
+        }
     }
 
     /*
     * Getters and Setters
     */
-    public long getStartTime() {
-        return startTime;
-    }
 
-    public void setStartTime(long startTime) {
-        this.startTime = startTime;
-    }
-
-    public long getEndTime() {
-        return endTime;
-    }
-
-    public void setEndTime(long endTime) {
-        this.endTime = endTime;
-    }
-
-    public String getTrackTitle() {
+    public String getTrackTitle()
+    {
         return trackTitle;
     }
 
-    public void setTrackTitle(String trackTitle) {
+    public void setTrackTitle(String trackTitle)
+    {
         this.trackTitle = trackTitle;
     }
 
-    public String getArtist() {
+    public String getArtist()
+    {
         return artist;
     }
 
-    public void setArtist(String artist) {
+    public void setArtist(String artist)
+    {
         this.artist = artist;
     }
 
-    public int getYear() {
+    public int getYear()
+    {
         return year;
     }
 
-    public void setYear(int year) {
+    public void setYear(int year)
+    {
         this.year = year;
     }
 
-    public String getPlatform() {
+    public String getPlatform()
+    {
         return platform;
     }
 
-    public void setPlatform(String platform) {
+    public void setPlatform(String platform)
+    {
         this.platform = platform;
     }
 
-    public BitState getState() {
+    public BitState getState()
+    {
         return state;
     }
 
-    public void setState(BitState state) {
+    public void setState(BitState state)
+    {
         this.state = state;
     }
 
