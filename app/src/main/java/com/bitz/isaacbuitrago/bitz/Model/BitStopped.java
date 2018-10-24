@@ -6,17 +6,18 @@ package com.bitz.isaacbuitrago.bitz.Model;
  *
  * @author isaacbuitrago
  */
-public class BitStopped extends Bit implements BitState
+public class BitStopped extends BitState
 {
 
     /**
      * Sets the end time of the Bit
      *
      * @param position
+     * @param bit
      */
     @Override
-    public void setTime(long position)
+    public void setTime(long position, Bit bit)
     {
-        endTime = position;
+        bit.endTime = position;
     }
 }

@@ -6,17 +6,17 @@ package com.bitz.isaacbuitrago.bitz.Model;
  *
  * @author isaacbuitrago
  */
-public class BitRecording extends Bit implements BitState
+public class BitRecording extends BitState
 {
     /**
      * Sets the start time of the Bit
      *
      * @param position
+     * @param bit
      */
     @Override
-    public void setTime(long position)
+    public void setTime(long position, Bit bit)
     {
-        startTime = position;
-
+        bit.startTime = position;
     }
 }

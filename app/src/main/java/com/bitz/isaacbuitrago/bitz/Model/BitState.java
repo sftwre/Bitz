@@ -5,7 +5,7 @@ package com.bitz.isaacbuitrago.bitz.Model;
  *
  * @author isaacbuitrago
  */
-public interface BitState
+public abstract class BitState
 {
 
     // TODO decouple the Bit from the Spotify API
@@ -14,7 +14,8 @@ public interface BitState
      * Used to set the timestamp of a Track
      *
      * @param position
+     * @param bit Bit to set the time on
      */
-    void setTime(long position);
+    public abstract void setTime(long position, Bit bit);
 
 }
