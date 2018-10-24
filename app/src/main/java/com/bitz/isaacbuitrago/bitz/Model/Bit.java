@@ -51,7 +51,7 @@ public class Bit
      */
     public void setTime(long position)
     {
-        state.setTime(position);
+        state.setTime(position, this);
     }
 
     /**
@@ -68,7 +68,6 @@ public class Bit
         }
         else
         {
-            // null
             state = states.get("BitRecording");
         }
     }

@@ -3,6 +3,7 @@ package com.bitz.isaacbuitrago.bitz.Activities;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.service.carrier.CarrierMessagingService;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v7.app.AppCompatActivity;
@@ -83,16 +84,9 @@ public class MusicPlayer extends AppCompatActivity
                  */
                 case R.id.navigation_bit:
 
-                    if(playerState != null)
-                    {
-                        bit.transitionState();
+                    bit.transitionState();
 
-                        bit.setTime(playerState.playbackPosition);
-                    }
-                    else
-                    {
-                        Log.e("MusicPlayer", "playerState is NULL");
-                    }
+                    playerApi.getPlayerState().setResultCallback(e -> bit.setTime(e.playbackPosition));
 
                     Log.i("MusicPlayer", String.valueOf(bit));
 
@@ -240,7 +234,6 @@ public class MusicPlayer extends AppCompatActivity
         // Subscribe to PlayerState
         playerApi.subscribeToPlayerState().setEventCallback(new Subscription.EventCallback<PlayerState>()
         {
-
             // Called when the Subscription receives a new event
 
             @Override
