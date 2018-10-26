@@ -18,6 +18,12 @@ public class BitStopped extends BitState
     @Override
     public void setTime(long position, Bit bit)
     {
-        bit.endTime = position;
+        bit.setEndTime(position);
+    }
+
+    @Override
+    public String toString()
+    {
+        return "Bit stopped";
     }
 }

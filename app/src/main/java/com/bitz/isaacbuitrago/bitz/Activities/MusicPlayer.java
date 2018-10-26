@@ -1,9 +1,9 @@
 package com.bitz.isaacbuitrago.bitz.Activities;
 
+import android.content.Context;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
-import android.service.carrier.CarrierMessagingService;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v7.app.AppCompatActivity;
@@ -12,6 +12,7 @@ import android.view.MenuItem;
 import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
+import android.widget.Toast;
 import com.bitz.isaacbuitrago.bitz.Application.Properties;
 import com.bitz.isaacbuitrago.bitz.Model.Bit;
 import com.bitz.isaacbuitrago.bitz.R;
@@ -65,22 +66,30 @@ public class MusicPlayer extends AppCompatActivity
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
 
-            = new BottomNavigationView.OnNavigationItemSelectedListener() {
+            = new BottomNavigationView.OnNavigationItemSelectedListener()
+    {
 
         @Override
-        public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+        public boolean onNavigationItemSelected(@NonNull MenuItem item)
+        {
             switch (item.getItemId())
             {
+                /**
+                 * Previous track
+                 */
                 case R.id.navigation_skip_previous:
                     timePlayed.setText(R.string.title_home);
                     return true;
 
+                /**
+                 * Next track
+                 */
                 case R.id.navigation_skip_next:
                     timePlayed.setText(R.string.title_dashboard);
                     return true;
 
                 /**
-                 * Handles interaction with the disk Button to create a Bit
+                 * Create Bit
                  */
                 case R.id.navigation_bit:
 
@@ -88,10 +97,18 @@ public class MusicPlayer extends AppCompatActivity
 
                     playerApi.getPlayerState().setResultCallback(e -> bit.setTime(e.playbackPosition));
 
-                    Log.i("MusicPlayer", String.valueOf(bit));
+                    Context context = getApplicationContext();
+
+                    CharSequence text = bit.getState().toString();
+
+                    int duration = Toast.LENGTH_SHORT;
+
+                    Toast toast = Toast.makeText(context, text, duration);
+                    toast.show();
 
                     return true;
             }
+
             return false;
         }
     };
@@ -101,7 +118,8 @@ public class MusicPlayer extends AppCompatActivity
      */
     private SeekBar.OnSeekBarChangeListener mOnSeekBarChangeListener =
 
-            new SeekBar.OnSeekBarChangeListener() {
+            new SeekBar.OnSeekBarChangeListener()
+            {
                 @Override
                 public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser)
                 {
@@ -241,10 +259,14 @@ public class MusicPlayer extends AppCompatActivity
             {
                 final Track track = playerState.track;
 
-                MusicPlayer.playerState = playerState;
-
                 if (track != null)
                 {
+                    bit.setTrackTitle(track.name);
+
+                    bit.setArtist(track.artist.toString());
+
+                    bit.setPlatform("spotify");
+
                     // TODO make async
                     // set the image for the current track
                     // renderImage(currentTrack.imageUri);

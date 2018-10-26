@@ -17,6 +17,12 @@ public class BitRecording extends BitState
     @Override
     public void setTime(long position, Bit bit)
     {
-        bit.startTime = position;
+        bit.setStartTime(position);
+    }
+
+    @Override
+    public String toString()
+    {
+        return "Bit Recording";
     }
 }

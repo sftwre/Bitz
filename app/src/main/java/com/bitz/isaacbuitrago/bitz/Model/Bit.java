@@ -10,15 +10,13 @@ import java.util.HashMap;
 public class Bit
 {
 
-    protected long startTime;       // start time of a Bit
+    private long startTime;       // start time of a Bit
 
-    protected long endTime;         // end time of a Bit
+    private long endTime;         // end time of a Bit
 
     private  String trackTitle;     // title of the Track
 
     private  String artist;         // name of artist
-
-    private int year;               // year track was published
 
     private  String platform;       // streaming platform the track is on
 
@@ -114,16 +112,6 @@ public class Bit
         this.artist = artist;
     }
 
-    public int getYear()
-    {
-        return year;
-    }
-
-    public void setYear(int year)
-    {
-        this.year = year;
-    }
-
     public String getPlatform()
     {
         return platform;
@@ -144,12 +132,33 @@ public class Bit
         this.state = state;
     }
 
+    public long getStartTime()
+    {
+        return startTime;
+    }
+
+    public void setStartTime(long startTime)
+    {
+        this.startTime = startTime;
+    }
+
+    public long getEndTime()
+    {
+        return endTime;
+    }
+
+    public void setEndTime(long endTime)
+    {
+        this.endTime = endTime;
+    }
+
     /**
      *
      * @return String representation of the Bit
      */
     public String toString()
     {
-        return (String.format("StartTime %d EndTime %d", startTime, endTime));
+        return (String.format("Track %s, Artist %s, platform %s, StartTime %d, EndTime %d",
+                trackTitle, artist, platform, startTime, endTime));
     }
 }
