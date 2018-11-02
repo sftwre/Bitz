@@ -15,17 +15,21 @@ import android.widget.TextView;
 import android.widget.Toast;
 import com.bitz.isaacbuitrago.bitz.Application.Properties;
 import com.bitz.isaacbuitrago.bitz.Model.Bit;
+import com.bitz.isaacbuitrago.bitz.Model.BitRecording;
+import com.bitz.isaacbuitrago.bitz.Model.BitStopped;
+import com.bitz.isaacbuitrago.bitz.Model.BitVerifier;
 import com.bitz.isaacbuitrago.bitz.R;
 import com.spotify.android.appremote.api.ConnectionParams;
 import com.spotify.android.appremote.api.Connector;
 import com.spotify.android.appremote.api.PlayerApi;
 import com.spotify.android.appremote.api.SpotifyAppRemote;
+import com.spotify.protocol.client.CallResult;
 import com.spotify.protocol.client.Subscription;
 import com.spotify.protocol.types.ImageUri;
 import com.spotify.protocol.types.PlayerState;
 import com.spotify.protocol.types.Track;
-
 import java.net.URL;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Responsible for rendering the image and data of the currently playing
@@ -60,8 +64,9 @@ public class MusicPlayer extends AppCompatActivity
 
     private Bit bit;
 
-    private static final long SLEEP_TIME = 1000;
+    private static final int  SLEEP_TIME = 1000;
 
+    private static final int CALLBACK_WAIT_TIME = 1000;
 
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
@@ -93,9 +98,9 @@ public class MusicPlayer extends AppCompatActivity
                  */
                 case R.id.navigation_bit:
 
-                    bit.transitionState();
+                    // change the state of the Bit each time the Disk is tapped
 
-                    playerApi.getPlayerState().setResultCallback(e -> bit.setTime(e.playbackPosition));
+                    bit.transitionState();
 
                     Context context = getApplicationContext();
 
@@ -104,7 +109,27 @@ public class MusicPlayer extends AppCompatActivity
                     int duration = Toast.LENGTH_SHORT;
 
                     Toast toast = Toast.makeText(context, text, duration);
+
                     toast.show();
+
+                    if(bit.getState() instanceof BitRecording)
+                    {
+                        playerApi.getPlayerState().setResultCallback(e -> handleCallBack(e));
+
+                    }
+                    else if(bit.getState() instanceof BitStopped)
+                    {
+
+                       CallResult<PlayerState> result = playerApi.getPlayerState().setResultCallback(e -> handleCallBack(e));
+
+                        playerApi.pause();
+
+                        result.await(CALLBACK_WAIT_TIME, TimeUnit.MILLISECONDS);
+
+                        BitVerifier bitVerifier = new BitVerifier(bit, playerApi);
+
+                        bitVerifier.verifyBit();
+                    }
 
                     return true;
             }
@@ -112,6 +137,17 @@ public class MusicPlayer extends AppCompatActivity
             return false;
         }
     };
+
+    /**
+     *
+     * @param playerState
+     *
+     * @return
+     */
+    public void handleCallBack(PlayerState playerState)
+    {
+       bit.setTime(playerState.playbackPosition);
+    }
 
     /**
      * Listener that responds to changes on the seek bar.
@@ -327,6 +363,14 @@ public class MusicPlayer extends AppCompatActivity
      * @param imageUri URI of the image to display on the album cover
      */
     private void renderImage(ImageUri imageUri)
+    {
+
+    }
+
+    /**
+     * Stops the music, and replays the track from the start time of the Bit.
+     */
+    private void verifyBit()
     {
 
     }
