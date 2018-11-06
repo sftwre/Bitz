@@ -1,11 +1,13 @@
 package com.bitz.isaacbuitrago.bitz.Activities;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.MenuItem;
@@ -29,7 +31,6 @@ import com.spotify.protocol.types.ImageUri;
 import com.spotify.protocol.types.PlayerState;
 import com.spotify.protocol.types.Track;
 import java.net.URL;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Responsible for rendering the image and data of the currently playing
@@ -120,18 +121,27 @@ public class MusicPlayer extends AppCompatActivity
                     else if(bit.getState() instanceof BitStopped)
                     {
 
-                       CallResult<PlayerState> result = playerApi.getPlayerState().setResultCallback(e -> handleCallBack(e));
+                        CallResult<PlayerState> result = playerApi.getPlayerState().setResultCallback(e -> handleCallBack(e));
 
-                        playerApi.pause();
+                       // result.await();
 
-                        result.await(CALLBACK_WAIT_TIME, TimeUnit.MILLISECONDS);
-
-                        BitVerifier bitVerifier = new BitVerifier(bit, playerApi);
+                        BitVerifier bitVerifier = new BitVerifier(bit, playerApi, MusicPlayer.this);
 
                         bitVerifier.verifyBit();
-                    }
 
-                    return true;
+//                        AlertDialog.Builder mBuilder = new AlertDialog.Builder(MusicPlayer.this);
+//
+//                        mBuilder.setMessage("Can you read me ?");
+//
+//                        mBuilder.setPositiveButton("Ok", null).
+//                                setNegativeButton("Cancel", null);
+//
+//                        AlertDialog dialog = mBuilder.create();
+//
+//                        dialog.show();
+
+                        return true;
+                    }
             }
 
             return false;
