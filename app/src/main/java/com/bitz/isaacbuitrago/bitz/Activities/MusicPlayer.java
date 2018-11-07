@@ -129,17 +129,6 @@ public class MusicPlayer extends AppCompatActivity
 
                         bitVerifier.verifyBit();
 
-//                        AlertDialog.Builder mBuilder = new AlertDialog.Builder(MusicPlayer.this);
-//
-//                        mBuilder.setMessage("Can you read me ?");
-//
-//                        mBuilder.setPositiveButton("Ok", null).
-//                                setNegativeButton("Cancel", null);
-//
-//                        AlertDialog dialog = mBuilder.create();
-//
-//                        dialog.show();
-
                         return true;
                     }
             }
@@ -184,13 +173,11 @@ public class MusicPlayer extends AppCompatActivity
                 public void onStartTrackingTouch(SeekBar seekBar)
                 {
                     handler.removeCallbacks(runnable);
-
                 }
 
                 @Override
                 public void onStopTrackingTouch(SeekBar seekBar)
                 {
-
                     handler.removeCallbacks(runnable);
                 }
             };
@@ -300,6 +287,7 @@ public class MusicPlayer extends AppCompatActivity
         {
             // Called when the Subscription receives a new event
 
+            // TODO determine how many times this is called
             @Override
             public void onEvent(PlayerState playerState)
             {
@@ -338,6 +326,7 @@ public class MusicPlayer extends AppCompatActivity
                     Log.i("MainActivity", builder.toString());
                 }
             }
+
         });
     }
 

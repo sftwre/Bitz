@@ -47,7 +47,6 @@ public class BitVerifier extends FragmentActivity
      */
     public void verifyBit()
     {
-
         playerApi.pause();
 
         long startTime = bit.getStartTime();
@@ -59,16 +58,22 @@ public class BitVerifier extends FragmentActivity
         // play track from start time
         playerApi.seekTo(startTime);
 
+        /**
+         * Start the timer task to pause the
+         * player and show the confirmation dialog
+         * after a specified time.
+         */
         playerApi.resume();
 
-        // prompt the user once the Bit complete
+        // pause the player
+        playerApi.pause();
 
+        // prompt the user once the Bit completes
         AlertDialog dialog = createVerifyDialog(context);
 
         dialog.show();
 
-        // pause the player
-        playerApi.pause();
+
     }
 
 
