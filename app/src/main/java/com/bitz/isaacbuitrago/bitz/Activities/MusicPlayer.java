@@ -1,13 +1,12 @@
 package com.bitz.isaacbuitrago.bitz.Activities;
 
 import android.content.Context;
-import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.MenuItem;
@@ -19,13 +18,11 @@ import com.bitz.isaacbuitrago.bitz.Application.Properties;
 import com.bitz.isaacbuitrago.bitz.Model.Bit;
 import com.bitz.isaacbuitrago.bitz.Model.BitRecording;
 import com.bitz.isaacbuitrago.bitz.Model.BitStopped;
-import com.bitz.isaacbuitrago.bitz.Model.BitVerifier;
 import com.bitz.isaacbuitrago.bitz.R;
 import com.spotify.android.appremote.api.ConnectionParams;
 import com.spotify.android.appremote.api.Connector;
 import com.spotify.android.appremote.api.PlayerApi;
 import com.spotify.android.appremote.api.SpotifyAppRemote;
-import com.spotify.protocol.client.CallResult;
 import com.spotify.protocol.client.Subscription;
 import com.spotify.protocol.types.ImageUri;
 import com.spotify.protocol.types.PlayerState;
@@ -70,6 +67,9 @@ public class MusicPlayer extends AppCompatActivity
     private static final int CALLBACK_WAIT_TIME = 1000;
 
 
+    /**
+     * Handles interaction with bottom navigation bar
+     */
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
 
             = new BottomNavigationView.OnNavigationItemSelectedListener()
@@ -115,19 +115,31 @@ public class MusicPlayer extends AppCompatActivity
 
                     if(bit.getState() instanceof BitRecording)
                     {
+                        // TODO this functionality need not be dependant on Spotify
+
                         playerApi.getPlayerState().setResultCallback(e -> handleCallBack(e));
 
                     }
                     else if(bit.getState() instanceof BitStopped)
                     {
 
-                        CallResult<PlayerState> result = playerApi.getPlayerState().setResultCallback(e -> handleCallBack(e));
+                       // CallResult<PlayerState> result = playerApi.getPlayerState().setResultCallback(e -> handleCallBack(e));
 
                        // result.await();
 
-                        BitVerifier bitVerifier = new BitVerifier(bit, playerApi, MusicPlayer.this);
+                        bit.setTime(70000);
 
-                        bitVerifier.verifyBit();
+                        playerApi.pause();
+
+                       // BitVerifier bitVerifier = new BitVerifier(bit, playerApi, MusicPlayer.this);
+
+                        //bitVerifier.verifyBit();
+
+                        Intent intent = new Intent(MusicPlayer.this, VerifyBit.class);
+
+                        intent.putExtra("Bit", bit);
+
+                        startActivity(intent);
 
                         return true;
                     }

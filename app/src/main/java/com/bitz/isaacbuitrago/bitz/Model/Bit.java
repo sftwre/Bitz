@@ -1,5 +1,6 @@
 package com.bitz.isaacbuitrago.bitz.Model;
 
+import java.io.Serializable;
 import java.util.HashMap;
 
 /**
@@ -7,7 +8,7 @@ import java.util.HashMap;
  *
  * Represents data about a track which can be shared
  */
-public class Bit
+public class Bit implements Serializable
 {
 
     private long startTime;       // start time of a Bit

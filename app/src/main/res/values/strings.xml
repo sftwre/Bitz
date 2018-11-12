@@ -25,5 +25,6 @@
     <string name="verify_bit_message"> How you like that Bit ?</string>
     <string name="verify_button"> Love it</string>
     <string name="cancel_button"> No</string>
+    <string name="title_activity_verify_bit">VerifyBit</string>
 
 </resources>

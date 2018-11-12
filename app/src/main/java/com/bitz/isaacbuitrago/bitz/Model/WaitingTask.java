@@ -10,14 +10,15 @@ import java.util.TimerTask;
  *
  * @author isaacbuitrago
  */
-public class BitTimerTask extends TimerTask implements MediaPlayer.OnPreparedListener, MediaPlayer.OnErrorListener, MediaPlayer.OnCompletionListener
+public class WaitingTask implements Runnable, MediaPlayer.OnPreparedListener, MediaPlayer.OnErrorListener, MediaPlayer.OnCompletionListener
 {
+
     public static long WAIT_TIME;   // time to wait for an action
 
     /**
      * Creates a BitTimerTask with a wait time.
      */
-    public BitTimerTask(long waitTime)
+    public WaitingTask(long waitTime)
     {
         WAIT_TIME = waitTime;
     }

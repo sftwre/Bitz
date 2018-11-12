@@ -1,13 +1,11 @@
 package com.bitz.isaacbuitrago.bitz.Model;
 
 import android.app.AlertDialog;
-import android.arch.core.executor.TaskExecutor;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.support.annotation.NonNull;
+import android.os.Handler;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
-
 import com.bitz.isaacbuitrago.bitz.R;
 import com.spotify.android.appremote.api.PlayerApi;
 
@@ -23,15 +21,16 @@ public class BitVerifier extends FragmentActivity
 
     private PlayerApi playerApi;
 
-    private AlertDialog alertDialog;    // Dialog to prompt the user for verification
-
     private Context context;            // context used to display the AlertDialog
+
+    private Handler handler;            // handler to manage work on current thread
 
 
     /**
      * Constructor
      * @param bit Bit to verify
      * @param playerApi API to remote player service
+     * @param context  application data for displaying the AlertDialog
      */
     public BitVerifier(Bit bit, PlayerApi playerApi, Context context)
     {
@@ -43,38 +42,9 @@ public class BitVerifier extends FragmentActivity
     }
 
     /**
-     *
+     * verifies the Bit
      */
-    public void verifyBit()
-    {
-        playerApi.pause();
 
-        long startTime = bit.getStartTime();
-
-        long endTime = bit.getEndTime();
-
-        long waitTime = endTime - startTime;
-
-        // play track from start time
-        playerApi.seekTo(startTime);
-
-        /**
-         * Start the timer task to pause the
-         * player and show the confirmation dialog
-         * after a specified time.
-         */
-        playerApi.resume();
-
-        // pause the player
-        playerApi.pause();
-
-        // prompt the user once the Bit completes
-        AlertDialog dialog = createVerifyDialog(context);
-
-        dialog.show();
-
-
-    }
 
 
     /**
@@ -85,7 +55,7 @@ public class BitVerifier extends FragmentActivity
      *
      * @return AlertDialog
      */
-    private AlertDialog createVerifyDialog(Context context)
+    private AlertDialog createVerifyAlertDialog(Context context)
     {
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
 
@@ -120,7 +90,7 @@ public class BitVerifier extends FragmentActivity
     /**
      *
      */
-    private void handeUserVerify()
+    private void handleUserVerify()
     {
 
     }
