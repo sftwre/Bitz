@@ -1,26 +1,32 @@
 package com.bitz.isaacbuitrago.bitz.Model;
 
 import android.media.MediaPlayer;
-
-import java.util.TimerTask;
+import android.os.Handler;
+import android.util.Log;
 
 /**
  * MediaPlayer observer that waits for a dictated time
- * to execute a unit of work.
+ * to execute a unit of work and sends message to
+ * the calling thread.
+ *
  *
  * @author isaacbuitrago
  */
 public class WaitingTask implements Runnable, MediaPlayer.OnPreparedListener, MediaPlayer.OnErrorListener, MediaPlayer.OnCompletionListener
 {
 
-    public static long WAIT_TIME;   // time to wait for an action
+    private static long SLEEP_TIME;   // time to wait for an action
+
+    private Handler handler;        // handler of calling thread
 
     /**
      * Creates a BitTimerTask with a wait time.
      */
-    public WaitingTask(long waitTime)
+    public WaitingTask(long waitTime, Handler handler)
     {
-        WAIT_TIME = waitTime;
+        SLEEP_TIME = waitTime;
+
+        this.handler = handler;
     }
 
     /**
@@ -29,12 +35,26 @@ public class WaitingTask implements Runnable, MediaPlayer.OnPreparedListener, Me
     @Override
     public void run()
     {
+
+        try
+        {
+            Log.e("WaitingTask", "Before sleep");
+
+
+            Thread.sleep(SLEEP_TIME);
+
+            // post the a message to calling thread
+
+        } catch (InterruptedException e)
+        {
+            Log.e("WaitingTask", e.getMessage());
+        }
     }
 
     /**
      *
      */
-    private void completeTask()
+    public void completeTask()
     {
 
     }
