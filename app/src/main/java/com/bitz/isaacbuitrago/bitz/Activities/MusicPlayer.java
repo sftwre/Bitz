@@ -37,7 +37,6 @@ import java.net.URL;
  */
 public class MusicPlayer extends AppCompatActivity
 {
-
     private SpotifyAppRemote mSpotifyAppRemote;
 
     private PlayerApi playerApi;
@@ -116,24 +115,13 @@ public class MusicPlayer extends AppCompatActivity
                     if(bit.getState() instanceof BitRecording)
                     {
                         // TODO this functionality need not be dependant on Spotify
-
                         playerApi.getPlayerState().setResultCallback(e -> handleCallBack(e));
-
                     }
                     else if(bit.getState() instanceof BitStopped)
                     {
-
-                       // CallResult<PlayerState> result = playerApi.getPlayerState().setResultCallback(e -> handleCallBack(e));
-
-                       // result.await();
-
-                        bit.setTime(70000);
+                        bit.setTime(40000);
 
                         playerApi.pause();
-
-                       // BitVerifier bitVerifier = new BitVerifier(bit, playerApi, MusicPlayer.this);
-
-                        //bitVerifier.verifyBit();
 
                         Intent intent = new Intent(MusicPlayer.this, VerifyBit.class);
 
@@ -212,6 +200,12 @@ public class MusicPlayer extends AppCompatActivity
         timePlayed = (TextView) findViewById(R.id.timePlayed);
 
         timeRemaining = (TextView) findViewById(R.id.timeRemaining);
+
+        // TODO remove
+        // hard code time stamps
+        timePlayed.setText(String.format("0:00"));
+
+        timeRemaining.setText(String.format("1:00"));
 
         albumCover = (ImageView) findViewById(R.id.albumCover);
 
@@ -374,14 +368,6 @@ public class MusicPlayer extends AppCompatActivity
      * @param imageUri URI of the image to display on the album cover
      */
     private void renderImage(ImageUri imageUri)
-    {
-
-    }
-
-    /**
-     * Stops the music, and replays the track from the start time of the Bit.
-     */
-    private void verifyBit()
     {
 
     }

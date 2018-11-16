@@ -1,5 +1,7 @@
 package com.bitz.isaacbuitrago.bitz.Model;
 
+import java.io.Serializable;
+
 /**
  * Bit in the stopped state,
  * user is no longer tracking a region of interest.
