@@ -1,6 +1,7 @@
 package com.bitz.isaacbuitrago.bitz.Activities;
 
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -14,6 +15,9 @@ import com.spotify.android.appremote.api.ConnectionParams;
 import com.spotify.android.appremote.api.Connector;
 import com.spotify.android.appremote.api.PlayerApi;
 import com.spotify.android.appremote.api.SpotifyAppRemote;
+
+import java.time.Duration;
+import java.time.Instant;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -155,25 +159,28 @@ public class VerifyBit extends AppCompatActivity
 
         long waitTime = endTime - startTime;
 
-        //Instant start = Instant.now();
+        // TODO remove
+        if(Build.VERSION.SDK_INT >= 26)
+        {
+            Instant start = Instant.now();
 
-        // schedule tasks to stop player after wait time
-        ScheduledFuture<?> handler = schedualer.schedule(new Runnable() {
-                @Override
-                public void run()
-                {
-                    playerApi.pause();
+            // schedule tasks to stop player after wait time
+            ScheduledFuture<?> handler = schedualer.schedule(() ->
+                    {
+                        playerApi.pause();
 
-                    //Instant finish = Instant.now();
+                        Instant finish = Instant.now();
 
-                   // long timeElapsed = Duration.between(start, finish).toMillis();
+                        long timeElapsed = Duration.between(start, finish).toMillis();
 
-                    //Log.i("VerifyBit", String.valueOf(timeElapsed));
-                }
-            }
-            , waitTime, TimeUnit.MILLISECONDS);
+                        String message = String.format("TimeElapsed : %d, WaitTime: %d", timeElapsed, waitTime);
 
-        schedualer.schedule(() -> handler.cancel(false), waitTime, TimeUnit.MILLISECONDS);
+                        Log.i("VerifyBit", message);
+                    }
+                    , waitTime, TimeUnit.MILLISECONDS);
+
+            schedualer.schedule(() -> handler.cancel(false), waitTime, TimeUnit.MILLISECONDS);
+        }
 
         // play track from start time
         playerApi.seekTo(startTime);
