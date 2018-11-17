@@ -11,9 +11,9 @@ import java.util.HashMap;
 public class Bit implements Serializable
 {
 
-    private long startTime;       // start time of a Bit
+    private long startTime;         // start time of a Bit
 
-    private long endTime;         // end time of a Bit
+    private long endTime;           // end time of a Bit
 
     private  String trackTitle;     // title of the Track
 
@@ -22,6 +22,8 @@ public class Bit implements Serializable
     private  String platform;       // streaming platform the track is on
 
     private BitState state;         // Bit state, either recording or stopped
+
+    private boolean dirty;          // dirty flag
 
 
     // set the active Bit states in a Bit
@@ -37,6 +39,8 @@ public class Bit implements Serializable
     public Bit()
     {
         this.state = new BitStopped();
+
+        this.dirty = false;
 
         // create the states for the Bit
         initStates();
@@ -151,6 +155,16 @@ public class Bit implements Serializable
     public void setEndTime(long endTime)
     {
         this.endTime = endTime;
+    }
+
+    public boolean isDirty()
+    {
+        return dirty;
+    }
+
+    public void setDirty(boolean dirty)
+    {
+        this.dirty = dirty;
     }
 
     /**
