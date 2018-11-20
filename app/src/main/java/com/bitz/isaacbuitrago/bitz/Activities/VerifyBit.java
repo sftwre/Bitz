@@ -15,7 +15,6 @@ import com.spotify.android.appremote.api.ConnectionParams;
 import com.spotify.android.appremote.api.Connector;
 import com.spotify.android.appremote.api.PlayerApi;
 import com.spotify.android.appremote.api.SpotifyAppRemote;
-
 import java.time.Duration;
 import java.time.Instant;
 import java.util.concurrent.Executors;
@@ -164,7 +163,7 @@ public class VerifyBit extends AppCompatActivity
         {
             Instant start = Instant.now();
 
-            // schedule tasks to stop player after wait time
+            // schedule task to stop player after wait time
             ScheduledFuture<?> handler = schedualer.schedule(() ->
                     {
                         playerApi.pause();

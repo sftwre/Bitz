@@ -9,7 +9,8 @@ import android.view.View;
 
 import com.bitz.isaacbuitrago.bitz.R;
 
-public class SendBitActivity extends AppCompatActivity {
+public class SendBitActivity extends AppCompatActivity
+{
 
     @Override
     protected void onCreate(Bundle savedInstanceState)

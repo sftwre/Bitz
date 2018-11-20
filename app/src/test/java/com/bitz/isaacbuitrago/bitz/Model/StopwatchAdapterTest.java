@@ -54,7 +54,7 @@ public class StopwatchAdapterTest
         checkUnModifiedStopWatch(stopwatchAdapter, DELAY1);
 
         checkUnModifiedStopWatch(stopwatchAdapter, DELAY2, DELAY1);
-        
+
     }
 
     private void checkModifiedStopWatch(StopwatchAdapter stopwatchAdapter, long p)

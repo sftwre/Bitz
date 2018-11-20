@@ -18,7 +18,9 @@ import com.bitz.isaacbuitrago.bitz.Application.Properties;
 import com.bitz.isaacbuitrago.bitz.Model.Bit;
 import com.bitz.isaacbuitrago.bitz.Model.BitRecording;
 import com.bitz.isaacbuitrago.bitz.Model.BitStopped;
+import com.bitz.isaacbuitrago.bitz.Model.StopwatchAdapter;
 import com.bitz.isaacbuitrago.bitz.R;
+import com.google.common.base.Stopwatch;
 import com.spotify.android.appremote.api.ConnectionParams;
 import com.spotify.android.appremote.api.Connector;
 import com.spotify.android.appremote.api.PlayerApi;
@@ -28,6 +30,9 @@ import com.spotify.protocol.types.ImageUri;
 import com.spotify.protocol.types.PlayerState;
 import com.spotify.protocol.types.Track;
 import java.net.URL;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Responsible for rendering the image and data of the currently playing
@@ -59,12 +64,17 @@ public class MusicPlayer extends AppCompatActivity
 
     private Runnable runnable;
 
+    private Timer scheduler;
+
+    private StopwatchAdapter stopwatch;
+
     private Bit bit;
 
-    private static final int  SLEEP_TIME = 1000;
+    private Track track;
 
-    private static final int CALLBACK_WAIT_TIME = 1000;
+    private static final int  DELAY_TIME = 1000;
 
+    private static final int  PERIOD = 800;
 
     /**
      * Handles interaction with bottom navigation bar
@@ -114,15 +124,16 @@ public class MusicPlayer extends AppCompatActivity
 
                     if(bit.getState() instanceof BitRecording)
                     {
-                        // TODO this functionality need not be dependant on Spotify
-                        playerApi.getPlayerState().setResultCallback(e -> handleCallBack(e));
+                        bit.setTime(stopwatch.getTime());
                     }
                     else if(bit.getState() instanceof BitStopped)
                     {
-                        bit.setTime(40000);
+                        bit.setTime(stopwatch.getTime());
 
+                        // pause the player
                         playerApi.pause();
 
+                        // Start the new Activity
                         Intent intent = new Intent(MusicPlayer.this, VerifyBit.class);
 
                         intent.putExtra("Bit", bit);
@@ -137,16 +148,6 @@ public class MusicPlayer extends AppCompatActivity
         }
     };
 
-    /**
-     *
-     * @param playerState
-     *
-     * @return
-     */
-    public void handleCallBack(PlayerState playerState)
-    {
-       bit.setTime(playerState.playbackPosition);
-    }
 
     /**
      * Listener that responds to changes on the seek bar.
@@ -162,6 +163,8 @@ public class MusicPlayer extends AppCompatActivity
                     if(fromUser && playerApi != null)
                     {
                         playerApi.seekTo((long) progress);
+
+                        stopwatch.setTime((long) progress);
                     }
                 }
 
@@ -172,13 +175,11 @@ public class MusicPlayer extends AppCompatActivity
                 @Override
                 public void onStartTrackingTouch(SeekBar seekBar)
                 {
-                    handler.removeCallbacks(runnable);
                 }
 
                 @Override
                 public void onStopTrackingTouch(SeekBar seekBar)
                 {
-                    handler.removeCallbacks(runnable);
                 }
             };
 
@@ -232,6 +233,14 @@ public class MusicPlayer extends AppCompatActivity
         // create the Bit for the activity
         bit = new Bit();
 
+        // create the StopwatchAdapter
+        stopwatch = new StopwatchAdapter();
+
+        // create the scheduler
+        scheduler = new Timer();
+
+
+        // TODO put this in separate Thread
         // Set Spotify the connection parameters
         ConnectionParams connectionParams = new ConnectionParams.Builder(Properties.CLIENT_ID)
                 .setRedirectUri(Properties.REDIRECT_URI)
@@ -253,7 +262,7 @@ public class MusicPlayer extends AppCompatActivity
 
                         Log.d("MainActivity", "Connected to Spotify");
 
-                        // start interacting with App Remote
+                        // start interacting with API
                         spotifyConnected();
                     }
 
@@ -288,24 +297,33 @@ public class MusicPlayer extends AppCompatActivity
         // play the track
         playerApi.play("spotify:user:spotify:playlist:37i9dQZF1DX2sUQwD7tbmL");
 
+        // start the stopwatch
+        stopwatch.start();
+
         // Subscribe to PlayerState
         playerApi.subscribeToPlayerState().setEventCallback(new Subscription.EventCallback<PlayerState>()
         {
-            // Called when the Subscription receives a new event
-
             // TODO determine how many times this is called
             @Override
             public void onEvent(PlayerState playerState)
             {
-                final Track track = playerState.track;
-
-                if (track != null)
+                if(playerState.isPaused)
                 {
+                    stopwatch.stop();
+                }
+
+                // if the bit has not already been modified by callback
+                if (! bit.isDirty())
+                {
+                    track = playerState.track;
+
                     bit.setTrackTitle(track.name);
 
                     bit.setArtist(track.artist.toString());
 
                     bit.setPlatform("spotify");
+
+                    bit.setDirty(true);
 
                     // TODO make async
                     // set the image for the current track
@@ -314,14 +332,19 @@ public class MusicPlayer extends AppCompatActivity
                     // set upper range of the progress bar
                     seekBar.setMax((int) track.duration);
 
-                    // change the seek bar
-                    changeSeekBar(playerState);
+                    // schedule task to update the SeekBar
+                    scheduler.schedule(new TimerTask()
+                    {
+                        @Override
+                        public void run()
+                        {
+                            changeSeekBar();
+                        }
+
+                    }, DELAY_TIME, PERIOD);
 
                     // TODO make async
                     // set the time stamps
-                    timePlayed.setText(String.format("0:00"));
-
-                    timeRemaining.setText(String.format("1:00"));
 
                     StringBuilder builder = new StringBuilder()
                                     .append("Playing '")
@@ -337,27 +360,26 @@ public class MusicPlayer extends AppCompatActivity
     }
 
     /**
-     * Used to set up property listeners for the seek bar
+     * Used to change SeekBar progress.
      *
-     * @param playerState state of the spotify player in the background
+     * @implNote cancels the scheduler and stops the timer
+     *           once elapsed stopwatch time exceeds the duration
+     *           of the track.
+     *
      */
-    private void changeSeekBar(final PlayerState playerState)
+    private void changeSeekBar()
     {
-        if(!(playerState.isPaused))
+        // If the stopwatch is has not exceeded track duration, set progress.
+        if(Build.VERSION.SDK_INT >= 21 &&
+                stopwatch.getTime() <= track.duration)
         {
-            runnable = new Runnable()
-            {
-                @Override
-                public void run()
-                {
-                    if(Build.VERSION.SDK_INT >= 24)
-                    {
-                        seekBar.setProgress((int) playerState.playbackPosition);
-                    }
-                }
-            };
+            seekBar.setProgress((int) stopwatch.getTime());
+        }
+        else
+        {
+            stopwatch.stop();
 
-            handler.postDelayed(runnable, SLEEP_TIME);
+            scheduler.cancel();
         }
     }
 
