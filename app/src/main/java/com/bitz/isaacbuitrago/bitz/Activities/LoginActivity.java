@@ -31,7 +31,7 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.List;
 import com.bitz.isaacbuitrago.bitz.R;
-import com.bitz.isaacbuitrago.bitz.Application.Properties;
+import com.bitz.isaacbuitrago.bitz.Util.Properties;
 import com.spotify.sdk.android.authentication.AuthenticationClient;
 import com.spotify.sdk.android.authentication.AuthenticationRequest;
 import com.spotify.sdk.android.authentication.AuthenticationResponse;
@@ -189,8 +189,10 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     }
 
 
-    private void populateAutoComplete() {
-        if (!mayRequestContacts()) {
+    private void populateAutoComplete()
+    {
+        if (!mayRequestContacts())
+        {
             return;
         }
 
@@ -240,7 +242,8 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
      */
     private void attemptLogin()
     {
-        if (mAuthTask != null) {
+        if (mAuthTask != null)
+        {
             return;
         }
 

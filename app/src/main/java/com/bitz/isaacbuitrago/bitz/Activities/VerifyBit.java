@@ -8,7 +8,7 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import com.bitz.isaacbuitrago.bitz.Application.Properties;
+import com.bitz.isaacbuitrago.bitz.Util.Properties;
 import com.bitz.isaacbuitrago.bitz.Model.Bit;
 import com.bitz.isaacbuitrago.bitz.R;
 import com.spotify.android.appremote.api.ConnectionParams;

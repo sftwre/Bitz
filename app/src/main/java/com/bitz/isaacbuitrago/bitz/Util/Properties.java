@@ -1,4 +1,4 @@
-package com.bitz.isaacbuitrago.bitz.Application;
+package com.bitz.isaacbuitrago.bitz.Util;
 
 import android.app.Application;
 
@@ -7,7 +7,7 @@ import android.app.Application;
  *
  * @author isaacbuitrago
  */
-public class Properties extends Application
+public class Properties
 {
 
     public static String accessToken;   // Authentication token for a streaming service

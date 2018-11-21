@@ -37,7 +37,7 @@
             android:theme="@style/AppTheme.NoActionBar">
         </activity>
 
-        <activity android:name=".Activities.MusicSearcher">
+        <activity android:name=".Util.APIFetcher">
             <intent-filter>
                 <action android:name="android.intent.action.SEARCH" />
             </intent-filter>
