@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v7.app.AppCompatActivity;
@@ -14,13 +13,15 @@ import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
-import com.bitz.isaacbuitrago.bitz.Application.Properties;
+
+import com.bitz.isaacbuitrago.bitz.Model.DownloadImageTask;
+import com.bitz.isaacbuitrago.bitz.Util.APIFetcher;
+import com.bitz.isaacbuitrago.bitz.Util.Properties;
 import com.bitz.isaacbuitrago.bitz.Model.Bit;
 import com.bitz.isaacbuitrago.bitz.Model.BitRecording;
 import com.bitz.isaacbuitrago.bitz.Model.BitStopped;
 import com.bitz.isaacbuitrago.bitz.Model.StopwatchAdapter;
 import com.bitz.isaacbuitrago.bitz.R;
-import com.google.common.base.Stopwatch;
 import com.spotify.android.appremote.api.ConnectionParams;
 import com.spotify.android.appremote.api.Connector;
 import com.spotify.android.appremote.api.PlayerApi;
@@ -29,10 +30,13 @@ import com.spotify.protocol.client.Subscription;
 import com.spotify.protocol.types.ImageUri;
 import com.spotify.protocol.types.PlayerState;
 import com.spotify.protocol.types.Track;
+import com.squareup.picasso.Picasso;
+
+import java.io.IOException;
 import java.net.URL;
+import java.util.DoubleSummaryStatistics;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Responsible for rendering the image and data of the currently playing
@@ -46,10 +50,6 @@ public class MusicPlayer extends AppCompatActivity
 
     private PlayerApi playerApi;
 
-    public static PlayerState playerState;
-
-    private URL apiRequest;
-
     private SeekBar seekBar;
 
     private TextView timePlayed;
@@ -59,10 +59,6 @@ public class MusicPlayer extends AppCompatActivity
     private ImageView albumCover;
 
     private BottomNavigationView navigation;
-
-    private Handler handler;
-
-    private Runnable runnable;
 
     private Timer scheduler;
 
@@ -196,8 +192,6 @@ public class MusicPlayer extends AppCompatActivity
 
         setContentView(R.layout.activity_create_bit);
 
-        handler = new Handler();
-
         timePlayed = (TextView) findViewById(R.id.timePlayed);
 
         timeRemaining = (TextView) findViewById(R.id.timeRemaining);
@@ -307,11 +301,6 @@ public class MusicPlayer extends AppCompatActivity
             @Override
             public void onEvent(PlayerState playerState)
             {
-                if(playerState.isPaused)
-                {
-                    stopwatch.stop();
-                }
-
                 // if the bit has not already been modified by callback
                 if (! bit.isDirty())
                 {
@@ -325,9 +314,8 @@ public class MusicPlayer extends AppCompatActivity
 
                     bit.setDirty(true);
 
-                    // TODO make async
-                    // set the image for the current track
-                    // renderImage(currentTrack.imageUri);
+                    // download image for the current track
+                    new DownloadImageTask().execute(track.uri);
 
                     // set upper range of the progress bar
                     seekBar.setMax((int) track.duration);
@@ -342,9 +330,6 @@ public class MusicPlayer extends AppCompatActivity
                         }
 
                     }, DELAY_TIME, PERIOD);
-
-                    // TODO make async
-                    // set the time stamps
 
                     StringBuilder builder = new StringBuilder()
                                     .append("Playing '")
@@ -381,17 +366,6 @@ public class MusicPlayer extends AppCompatActivity
 
             scheduler.cancel();
         }
-    }
-
-    /**
-     * Renders an album or track image on the album cover by fetching
-     * the image from the specified URI.
-     *
-     * @param imageUri URI of the image to display on the album cover
-     */
-    private void renderImage(ImageUri imageUri)
-    {
-
     }
 
 }

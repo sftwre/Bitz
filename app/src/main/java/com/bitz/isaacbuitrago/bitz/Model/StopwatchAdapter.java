@@ -42,7 +42,8 @@ public class StopwatchAdapter
     }
 
     /**
-     * Set stopwatch time to position
+     * Set stopwatch time to position.
+     * Marks the StopWatch as ba
      *
      * @param position
      */

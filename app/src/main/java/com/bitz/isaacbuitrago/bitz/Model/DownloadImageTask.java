@@ -48,9 +48,7 @@ public class DownloadImageTask extends AsyncTask<String, Integer, Boolean>
                         @Override
                         public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from)
                         {
-
                             // once the image is loaded, store on disk
-
                             String root = Environment.getExternalStorageDirectory().toString();
 
                             File myDir = new File(root + "/Bitz");

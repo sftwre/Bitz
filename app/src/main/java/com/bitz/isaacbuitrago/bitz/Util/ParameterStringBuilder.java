@@ -5,7 +5,7 @@ import java.net.URLEncoder;
 import java.util.Map;
 
 /**
- * Helper class to build a parameter string for an HTTP requests
+ * Helper class to build a parameter string for an HTTP request
  *
  * @author isaacbuitrago
  */
