@@ -8,7 +8,6 @@ import android.util.Log;
 import com.bitz.isaacbuitrago.bitz.Util.APIFetcher;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
-
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -22,7 +21,7 @@ import java.util.Date;
  *
  * @author isaacbuitrago
  */
-public class DownloadImageTask extends AsyncTask<String, Integer, Boolean>
+public class DownloadImageTask extends AsyncTask<String, Void, Void>
 {
     /**
      * Downloads the
@@ -30,17 +29,21 @@ public class DownloadImageTask extends AsyncTask<String, Integer, Boolean>
      * @return
      */
     @Override
-    protected Boolean doInBackground(String [] strings)
+    protected Void doInBackground(String [] strings)
     {
         APIFetcher apiFetcher = new APIFetcher();
 
-        if(strings.length > 1)
+        if(strings.length >= 1)
         {
             for(int i = 0; i < strings.length; i++)
             {
                 try
                 {
                     String url = apiFetcher.fetchImage(strings[i]);
+
+                    // if the image URL is not found, return
+                    if(url == null)
+                        return null;
 
                     Picasso.get().load(url).into(new Target()
                     {
@@ -93,11 +96,11 @@ public class DownloadImageTask extends AsyncTask<String, Integer, Boolean>
                 {
                     Log.e("DownloadImageTask", e.getMessage());
 
-                    return false;
                 }
             }
         }
 
-        return true;
+        return null;
     }
+
 }

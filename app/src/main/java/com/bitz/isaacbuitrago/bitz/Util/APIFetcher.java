@@ -1,11 +1,8 @@
 package com.bitz.isaacbuitrago.bitz.Util;
 
-import android.app.ListActivity;
-import android.app.SearchManager;
-import android.content.Intent;
-import android.os.Bundle;
+
 import android.util.Log;
-import com.bitz.isaacbuitrago.bitz.Model.PlaylistImage;
+import com.bitz.isaacbuitrago.bitz.Model.PlayListImages;
 import com.google.gson.Gson;
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
@@ -26,34 +23,12 @@ import java.util.regex.Pattern;
  *
  * @author isaacbuitrago
  */
-public class APIFetcher extends ListActivity
+public class APIFetcher
 {
 
     private URL apiRequest =  null;
 
     private HttpURLConnection httpConnection = null;
-
-    @Override
-    public void onCreate(Bundle savedInstanceState)
-    {
-        super.onCreate(savedInstanceState);
-
-        // Get the intent, verify the action and get the query
-        Intent intent = getIntent();
-        if (Intent.ACTION_SEARCH.equals(intent.getAction()))
-        {
-            String query = intent.getStringExtra(SearchManager.QUERY);
-
-            search(query);
-        }
-    }
-
-    @Override
-    protected void onStart()
-    {
-        super.onStart();
-
-    }
 
     /**
      *
@@ -139,17 +114,19 @@ public class APIFetcher extends ListActivity
      *
      * @param uri of an image
      *
-     * @return url of the image
+     * @return url of the image or null if it is not provided
      */
     public String fetchImage(String uri) throws IOException
     {
-        Pattern pattern = Pattern.compile("\\w+:\\w+:(\\w+)$");
+        Pattern uriP = Pattern.compile("\\w+:\\w+:(\\w+)$");
 
-        Matcher matcher = pattern.matcher(uri);
+        Pattern jsonP = Pattern.compile("\"url\":\"(.+?)\"");
 
-        matcher.find();
+        Matcher uriM = uriP.matcher(uri);
 
-        String playlistId = matcher.group(1);
+        uriM.find();
+
+        String playlistId = uriM.group(1);
 
         String endpoint = APIEndpoints.GET_IMAGES.replaceAll("\\?", playlistId);
 
@@ -172,10 +149,17 @@ public class APIFetcher extends ListActivity
             // read the response
             String response =  httpConnection.getResponseMessage();
 
-            // convert to Json
-            PlaylistImage playlistImage = new Gson().fromJson(response, PlaylistImage.class);
+            // TODO use serialization
 
-            return( playlistImage.getUrl());
+            Matcher jsonM = jsonP.matcher(response);
+
+            // return url of first image
+            if(jsonM.find())
+            {
+                return jsonM.group(1);
+            }
+            else
+                return null;
 
         }
         finally

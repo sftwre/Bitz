@@ -6,7 +6,7 @@ package com.bitz.isaacbuitrago.bitz.Model;
  *
  * @author isaacbuitrago
  */
-public class PlaylistImage
+public class PlayListImage
 {
     int height;
 

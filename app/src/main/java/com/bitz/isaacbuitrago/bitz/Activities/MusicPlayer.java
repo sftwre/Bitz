@@ -2,9 +2,11 @@ package com.bitz.isaacbuitrago.bitz.Activities;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -13,9 +15,7 @@ import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import com.bitz.isaacbuitrago.bitz.Model.DownloadImageTask;
-import com.bitz.isaacbuitrago.bitz.Util.APIFetcher;
 import com.bitz.isaacbuitrago.bitz.Util.Properties;
 import com.bitz.isaacbuitrago.bitz.Model.Bit;
 import com.bitz.isaacbuitrago.bitz.Model.BitRecording;
@@ -26,15 +26,14 @@ import com.spotify.android.appremote.api.ConnectionParams;
 import com.spotify.android.appremote.api.Connector;
 import com.spotify.android.appremote.api.PlayerApi;
 import com.spotify.android.appremote.api.SpotifyAppRemote;
+import com.spotify.protocol.client.CallResult;
 import com.spotify.protocol.client.Subscription;
-import com.spotify.protocol.types.ImageUri;
 import com.spotify.protocol.types.PlayerState;
 import com.spotify.protocol.types.Track;
-import com.squareup.picasso.Picasso;
+import com.spotify.sdk.android.authentication.AuthenticationClient;
+import com.spotify.sdk.android.authentication.AuthenticationRequest;
+import com.spotify.sdk.android.authentication.AuthenticationResponse;
 
-import java.io.IOException;
-import java.net.URL;
-import java.util.DoubleSummaryStatistics;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -71,6 +70,9 @@ public class MusicPlayer extends AppCompatActivity
     private static final int  DELAY_TIME = 1000;
 
     private static final int  PERIOD = 800;
+
+    private static final int REQUEST_CODE = 1;
+
 
     /**
      * Handles interaction with bottom navigation bar
@@ -214,6 +216,52 @@ public class MusicPlayer extends AppCompatActivity
 
     }
 
+
+    /**
+     * handles results returned from Activities launched by this Activity
+     * @param requestCode
+     * @param resultCode
+     * @param data
+     */
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data)
+    {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if(requestCode == REQUEST_CODE)
+        {
+            AuthenticationResponse response = AuthenticationClient.getResponse(resultCode, data);
+
+            switch (response.getType())
+            {
+                // Response was successful and contains auth token
+                case TOKEN:
+
+                    // save the auth token
+                    Properties.accessToken = response.getAccessToken();
+
+                    Log.i("MusicPlayer", "Authenticated to Spotify");
+
+                    break;
+
+                // Auth flow returned an error
+                case ERROR:
+                    // Handle error response
+
+                    Log.e("MusicPlayer", "Error authenticating to Spotify");
+
+                    break;
+
+                // Most likely auth flow was cancelled
+                default:
+                    // Handle other cases
+
+                    Log.e("MusicPlayer", "Error authenticating to Spotify");
+
+            }
+        }
+    }
+
     /**
      * Starts the activity, connects to the Spotify process,
      * and starts activity with the remote process.
@@ -233,17 +281,23 @@ public class MusicPlayer extends AppCompatActivity
         // create the scheduler
         scheduler = new Timer();
 
+        // Authenticate user on Spotify
+        AuthenticationRequest.Builder builder =
+                new AuthenticationRequest.Builder(Properties.CLIENT_ID, AuthenticationResponse.Type.TOKEN, Properties.REDIRECT_URI);
 
-        // TODO put this in separate Thread
-        // Set Spotify the connection parameters
-        ConnectionParams connectionParams = new ConnectionParams.Builder(Properties.CLIENT_ID)
-                .setRedirectUri(Properties.REDIRECT_URI)
-                .showAuthView(true)
-                .build();
+        builder.setScopes(new String[]{"app-remote-control"});
+        AuthenticationRequest request = builder.build();
 
-        Log.i("LoginActivity", "Set connection params for Spotify");
+        AuthenticationClient.openLoginActivity(this, REQUEST_CODE, request);
 
         // Connect to Spotify
+        ConnectionParams connectionParams =
+                new ConnectionParams.Builder(Properties.CLIENT_ID)
+                        .setRedirectUri(Properties.REDIRECT_URI)
+                        .showAuthView(true)
+                        .build();
+
+
         SpotifyAppRemote.CONNECTOR.connect(this, connectionParams,
                 new Connector.ConnectionListener()
                 {
@@ -267,6 +321,8 @@ public class MusicPlayer extends AppCompatActivity
 
                     }
                 });
+
+
 
         Log.i("LoginActivity", "Connected to spotify");
 
@@ -315,7 +371,7 @@ public class MusicPlayer extends AppCompatActivity
                     bit.setDirty(true);
 
                     // download image for the current track
-                    new DownloadImageTask().execute(track.uri);
+                    //new DownloadImageTask().execute(track.uri);
 
                     // set upper range of the progress bar
                     seekBar.setMax((int) track.duration);
