@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "66055308431",
+    "firebase_url": "https://bitz-adbf2.firebaseio.com",
+    "project_id": "bitz-adbf2",
+    "storage_bucket": "bitz-adbf2.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:66055308431:android:b6c1a5e4343cbfb7",
+        "android_client_info": {
+          "package_name": "com.bitz.isaacbuitrago.bitz"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "66055308431-as44qr5r3fftt4u2i8vf52kiakj5u4mn.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBLZYQB4R5kiSCUpRYjiM_FvmWEOeicyuE"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
