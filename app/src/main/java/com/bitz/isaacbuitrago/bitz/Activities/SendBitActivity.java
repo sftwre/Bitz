@@ -7,6 +7,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 
+import com.bitz.isaacbuitrago.bitz.Database.FriendsData;
 import com.bitz.isaacbuitrago.bitz.R;
 
 public class SendBitActivity extends AppCompatActivity
@@ -36,4 +37,14 @@ public class SendBitActivity extends AppCompatActivity
         });
     }
 
+    @Override
+    protected void onStart()
+    {
+        super.onStart();
+
+        FriendsData friends = new FriendsData();
+
+        friends.fetch();
+
+    }
 }

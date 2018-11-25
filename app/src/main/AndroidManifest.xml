@@ -15,11 +15,9 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-
         <activity
             android:name="com.spotify.sdk.android.authentication.LoginActivity"
             android:theme="@android:style/Theme.Translucent.NoTitleBar" />
-
         <activity
             android:name=".Activities.MusicPlayer"
             android:label="@string/app_name">
@@ -29,32 +27,25 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
         <activity
             android:name=".Activities.LoginActivity"
-            android:label="@string/title_activity_login">
-        </activity>
-
+            android:label="@string/title_activity_login"></activity>
         <activity
             android:name=".Activities.MusicLibrary"
             android:label="@string/title_activity_music_library"
-            android:theme="@style/AppTheme.NoActionBar">
-        </activity>
-
-
+            android:theme="@style/AppTheme.NoActionBar"></activity>
         <activity
             android:name=".Activities.VerifyBit"
             android:label="@string/title_activity_verify_bit"
             android:parentActivityName=".Activities.MusicPlayer"
-            android:theme="@style/AppTheme.NoActionBar">
-        </activity>
-
+            android:theme="@style/AppTheme.NoActionBar"></activity>
         <activity
             android:name=".Activities.SendBitActivity"
             android:label="@string/title_activity_send_bit"
-            android:theme="@style/AppTheme.NoActionBar">
-        </activity>
-
+            android:theme="@style/AppTheme.NoActionBar"></activity>
+        <activity
+            android:name=".Activities.CreateAccountActivity"
+            android:label="@string/title_activity_create"></activity>
     </application>
 
 </manifest>

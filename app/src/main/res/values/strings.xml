@@ -7,8 +7,8 @@
     <string name="title_activity_login">Sign in</string>
 
     <!-- Strings related to login -->
-    <string name="prompt_email">Email</string>
-    <string name="prompt_password">Password (optional)</string>
+    <string name="prompt_email_or_user">email or username</string>
+    <string name="prompt_password">password </string>
     <string name="action_sign_in">Sign in or register</string>
     <string name="action_sign_in_short">Sign in</string>
     <string name="error_invalid_email">This email address is invalid</string>
@@ -21,11 +21,21 @@
     <string name="title_activity_music_library">MusicLibrary</string>
     <string name="search_hint">Search for a song or artist</string>
 
+    <!-- Strings related to account creation-->
+    <string name="prompt_first_name">First Name</string>
+    <string name="prompt_last_name">Last Name</string>
+    <string name="prompt_user_name">Username</string>
+    <string name="prompt_email">Email</string>
+    <string name="prompt_pass">Password</string>
+    <string name="action_create_account">Create account</string>
+
+
     <!-- Strings related to a Bit -->
     <string name="verify_bit_message"> How you like that Bit ?</string>
     <string name="verify_button"> Love it !</string>
     <string name="cancel_button"> No</string>
     <string name="title_activity_verify_bit">VerifyBit</string>
     <string name="title_activity_send_bit">SendBitActivity</string>
+    <string name="title_activity_create">Create Account</string>
 
 </resources>
