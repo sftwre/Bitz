@@ -35,7 +35,7 @@ public class UserData extends Gateway
         // cast data to user
         User user = (User) data;
 
-        mDatabase.child(((User) data).getUsername()).setValue(data);
+        mDatabase.child(((User) data).getId()).setValue(data);
 
         Log.i(TAG, String.format("Created new account for '%s' ", ((User) data).getUsername()));
     }

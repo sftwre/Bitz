@@ -3,10 +3,8 @@ package com.bitz.isaacbuitrago.bitz.Activities;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
-import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -37,20 +35,22 @@ import static android.support.constraint.Constraints.TAG;
  */
 public class CreateAccountActivity extends AppCompatActivity
 {
-    /**
-     * Keep track of the Account creation task to ensure we can cancel it if requested.
-     */
-    private AccountCreationTask mAuthTask = null;
-
     // UI references.
     private AutoCompleteTextView mEmailView;
+
     private EditText mFirstNameView;
+
     private EditText mLastNameView;
+
     private EditText mUsernameView;
+
     private EditText mPasswordView;
+
     private View mProgressView;
+
     private View mLoginFormView;
-    private FirebaseAuth mAuth;
+
+    private FirebaseAuth mAuth;     // firebase reference
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -106,9 +106,6 @@ public class CreateAccountActivity extends AppCompatActivity
      */
     private void createAccount()
     {
-        if (mAuthTask != null) {
-            return;
-        }
 
         // Reset errors.
         mEmailView.setError(null);
@@ -144,11 +141,13 @@ public class CreateAccountActivity extends AppCompatActivity
             cancel = true;
         }
 
-        if (cancel) {
+        if (cancel)
+        {
             // There was an error; don't attempt login and focus the first
             // form field with an error.
             focusView.requestFocus();
-        } else {
+        }
+        else {
 
             newUser.setEmail(email);
             newUser.setPassword(password);
@@ -156,13 +155,41 @@ public class CreateAccountActivity extends AppCompatActivity
             // Show a progress spinner, and kick off a background task to
             // perform the user login attempt.
             showProgress(true);
-            mAuthTask = new AccountCreationTask(newUser);
 
-            mAuthTask.setUser(newUser);
+            mAuth.createUserWithEmailAndPassword(newUser.getEmail(), newUser.getPassword())
 
-            mAuthTask.setContext(this);
+                    .addOnCompleteListener(CreateAccountActivity.this, new OnCompleteListener<AuthResult>()
+                    {
 
-            mAuthTask.execute((Void) null);
+                        UserData mUserData = new UserData();
+
+                        @Override
+                        public void onComplete(@NonNull Task<AuthResult> task)
+                        {
+                            if (task.isSuccessful())
+                            {
+
+                                FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+
+                                // Store account information in the database
+                                newUser.setId(currentUser.getUid());
+
+                                mUserData.write(newUser);
+
+                                // Sign in success, update UI with the signed-in user's information
+                                Log.d(TAG, "createUserWithEmail:success");
+
+                                showProgress(false);
+                            }
+                            else {
+
+                                // If sign in fails, display a message to the user.
+                                Log.w(TAG, "createUserWithEmail:failure", task.getException());
+
+                                Toast.makeText(CreateAccountActivity.this, "Error with authentication", Toast.LENGTH_SHORT).show();
+                            }
+                        }
+                    });
         }
     }
 
@@ -216,93 +243,5 @@ public class CreateAccountActivity extends AppCompatActivity
         }
     }
 
-
-    /**
-     * Represents an asynchronous login/registration task used to authenticate
-     * the user.
-     */
-    public class AccountCreationTask extends AsyncTask<Void, Void, Boolean>
-    {
-        private final UserData mUserData = new UserData();
-
-        private User user;          // user data to store
-
-        private Context context;    // context of activity
-
-        AccountCreationTask(User user)
-        {
-            this.user = user;
-        }
-
-        @Override
-        protected Boolean doInBackground(Void... params)
-        {
-
-            CreateAccountActivity.this.mAuth.createUserWithEmailAndPassword(user.getEmail(), user.getPassword())
-
-                    .addOnCompleteListener(CreateAccountActivity.this, new OnCompleteListener<AuthResult>()
-                    {
-                        @Override
-                        public void onComplete(@NonNull Task<AuthResult> task)
-                        {
-                            if (task.isSuccessful())
-                            {
-
-                                FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
-
-                                // Store account information in the database
-                                user.setId("1");
-
-                                mUserData.write(user);
-
-                                // Sign in success, update UI with the signed-in user's information
-                                Log.d(TAG, "createUserWithEmail:success");
-
-                                showProgress(false);
-                            }
-                            else {
-
-                                // If sign in fails, display a message to the user.
-                                Log.w(TAG, "createUserWithEmail:failure", task.getException());
-
-                                Toast.makeText(context, "Error with authentication", Toast.LENGTH_SHORT).show();
-                            }
-                        }
-                    });
-
-            return true;
-        }
-
-        public void setUser(User user)
-        {
-            this.user = user;
-        }
-
-        public void setContext(Context context)
-        {
-            this.context = context;
-        }
-
-        @Override
-        protected void onPostExecute(final Boolean success)
-        {
-            mAuthTask = null;
-            showProgress(false);
-
-            if (success)
-            {
-                finish();
-            } else {
-                mPasswordView.setError(getString(R.string.error_incorrect_password));
-                mPasswordView.requestFocus();
-            }
-        }
-
-        @Override
-        protected void onCancelled() {
-            mAuthTask = null;
-            showProgress(false);
-        }
-    }
 }
 
