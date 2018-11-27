@@ -15,6 +15,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "66055308431-bu1tii1mrikt9cqop94dfr2ln6mtfkii.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.bitz.isaacbuitrago.bitz",
+            "certificate_hash": "41dd629683bfbd3428d44c946052f30ef96a4dd8"
+          }
+        },
+        {
           "client_id": "66055308431-as44qr5r3fftt4u2i8vf52kiakj5u4mn.apps.googleusercontent.com",
           "client_type": 3
         }
@@ -29,8 +37,13 @@
           "status": 1
         },
         "appinvite_service": {
-          "status": 1,
-          "other_platform_oauth_client": []
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "66055308431-as44qr5r3fftt4u2i8vf52kiakj5u4mn.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         },
         "ads_service": {
           "status": 2
