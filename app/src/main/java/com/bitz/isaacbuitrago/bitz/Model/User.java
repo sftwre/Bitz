@@ -2,12 +2,14 @@ package com.bitz.isaacbuitrago.bitz.Model;
 
 /**
  *
- * User account information
+ * Account information for a user.
  *
  * @author isaacbuitrago
  */
 public class User
 {
+
+    private String id;      // unique id
 
     private String firstName;
 
@@ -15,10 +17,9 @@ public class User
 
     private String username;
 
-    private String password;    // TODO remove
-
     private String email;
 
+    private String password;
 
     public User(String firstName, String lastName, String username)
     {
@@ -41,6 +42,8 @@ public class User
 
     public void setFirstName(String firstName)
     {
+        // TODO hash
+
         this.firstName = firstName;
     }
 
@@ -64,12 +67,12 @@ public class User
         this.username = username;
     }
 
-    public String getPassword() {
-        return password;
+    public String getId() {
+        return id;
     }
 
-    public void setPassword(String password) {
-        this.password = password;
+    public void setId(String id) {
+        this.id = id;
     }
 
     public String getEmail() {
@@ -78,5 +81,13 @@ public class User
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 }
