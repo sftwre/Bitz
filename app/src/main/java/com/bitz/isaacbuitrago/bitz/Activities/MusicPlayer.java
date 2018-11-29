@@ -218,7 +218,7 @@ public class MusicPlayer extends AppCompatActivity
 
 
     /**
-     * handles results returned from Activities launched by this Activity
+     * handles results returned userName Activities launched by this Activity
      * @param requestCode
      * @param resultCode
      * @param data
@@ -336,7 +336,7 @@ public class MusicPlayer extends AppCompatActivity
 
         SpotifyAppRemote.CONNECTOR.disconnect(mSpotifyAppRemote);
 
-        Log.i("MusicPlayer", "Disconnected from Spotify");
+        Log.i("MusicPlayer", "Disconnected userName Spotify");
     }
 
     /**

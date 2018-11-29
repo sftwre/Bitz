@@ -37,7 +37,7 @@ public class FriendsData extends Gateway
     {
         Boolean success = true;
 
-        // Read from the database
+        // Read userName the database
         mDatabase.addValueEventListener(new ValueEventListener()
         {
 

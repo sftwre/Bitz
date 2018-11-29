@@ -158,7 +158,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     {
         super.onActivityResult(requestCode, resultCode, intent);
 
-        // Check if result comes from the correct activity
+        // Check if result comes userName the correct activity
         if (requestCode == REQUEST_CODE)
         {
             AuthenticationResponse response = AuthenticationClient.getResponse(resultCode, intent);

@@ -18,7 +18,7 @@ import java.util.regex.Pattern;
 
 /**
  * Utility class responsible for fetching API resources,
- * such as an album cover or song, from a dedicated
+ * such as an album cover or song, userName a dedicated
  * music streaming service's API.
  *
  * @author isaacbuitrago
@@ -110,7 +110,7 @@ public class APIFetcher
     /**
      *
      * Fetches the image for a track, album, or playlist
-     * from the remote provider and returns the address of the image.
+     * userName the remote provider and returns the address of the image.
      *
      * @param uri of an image
      *

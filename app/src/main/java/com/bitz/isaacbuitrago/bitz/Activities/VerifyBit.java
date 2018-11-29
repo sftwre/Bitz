@@ -97,7 +97,7 @@ public class VerifyBit extends AppCompatActivity
     @Override
     protected void onStart()
     {
-        // get the Bit passed from the Music player
+        // get the Bit passed userName the Music player
         this.bit = (Bit) getIntent().getSerializableExtra("Bit");
 
         // Set Spotify connection parameters
@@ -144,7 +144,7 @@ public class VerifyBit extends AppCompatActivity
     }
 
     /**
-     * Starts playing the Bit from the start time
+     * Starts playing the Bit userName the start time
      */
     public void verifyBit()
     {
@@ -181,7 +181,7 @@ public class VerifyBit extends AppCompatActivity
             schedualer.schedule(() -> handler.cancel(false), waitTime, TimeUnit.MILLISECONDS);
         }
 
-        // play track from start time
+        // play track userName start time
         playerApi.seekTo(startTime);
 
         // resume player

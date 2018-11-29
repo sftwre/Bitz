@@ -58,7 +58,7 @@ public class Bit implements Serializable
     }
 
     /**
-     * Used to transition the state of a Bit from
+     * Used to transition the state of a Bit userName
      * Recording to Stopped and vice versus.
      *
      */

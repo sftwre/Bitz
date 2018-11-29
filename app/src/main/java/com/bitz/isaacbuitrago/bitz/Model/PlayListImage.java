@@ -2,7 +2,7 @@ package com.bitz.isaacbuitrago.bitz.Model;
 
 /**
  * Represents the image for playlist.
- * Used to deserialize responses from an API.
+ * Used to deserialize responses userName an API.
  *
  * @author isaacbuitrago
  */
