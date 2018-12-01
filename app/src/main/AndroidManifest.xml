@@ -37,16 +37,17 @@
         <activity
             android:name=".Activities.SendBitActivity"
             android:label="@string/title_activity_send_bit"
-            android:theme="@style/AppTheme.NoActionBar"></activity>
-        <activity
-            android:name=".Activities.CreateAccountActivity"
-            android:label="@string/title_activity_create">
-
+            android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+        </activity>
+
+        <activity
+            android:name=".Activities.CreateAccountActivity"
+            android:label="@string/title_activity_create">
 
         </activity>
 

@@ -2,7 +2,6 @@ package com.bitz.isaacbuitrago.bitz.Activities;
 
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -15,7 +14,6 @@ import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
-import com.bitz.isaacbuitrago.bitz.Model.DownloadImageTask;
 import com.bitz.isaacbuitrago.bitz.Util.Properties;
 import com.bitz.isaacbuitrago.bitz.Model.Bit;
 import com.bitz.isaacbuitrago.bitz.Model.BitRecording;
@@ -26,14 +24,12 @@ import com.spotify.android.appremote.api.ConnectionParams;
 import com.spotify.android.appremote.api.Connector;
 import com.spotify.android.appremote.api.PlayerApi;
 import com.spotify.android.appremote.api.SpotifyAppRemote;
-import com.spotify.protocol.client.CallResult;
 import com.spotify.protocol.client.Subscription;
 import com.spotify.protocol.types.PlayerState;
 import com.spotify.protocol.types.Track;
 import com.spotify.sdk.android.authentication.AuthenticationClient;
 import com.spotify.sdk.android.authentication.AuthenticationRequest;
 import com.spotify.sdk.android.authentication.AuthenticationResponse;
-
 import java.util.Timer;
 import java.util.TimerTask;
 

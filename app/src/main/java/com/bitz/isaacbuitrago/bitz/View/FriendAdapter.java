@@ -13,6 +13,7 @@ import com.bitz.isaacbuitrago.bitz.Model.Friend;
 import com.bitz.isaacbuitrago.bitz.R;
 import java.util.ArrayList;
 import java.util.List;
+import static android.view.View.NO_ID;
 
 /**
  * Adapter and ViewHolder for handling the display of a list of friends.
@@ -24,8 +25,8 @@ public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.FriendsVie
 {
 
     private Context mContext;
-    private List<Friend> messages;
-    private MessageAdapterListener listener;
+    private List<Friend> friends;
+    private FriendAdapterListener listener;
     private SparseBooleanArray selectedItems;
 
     // array used to perform multiple animation at once
@@ -38,7 +39,7 @@ public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.FriendsVie
 
     public class FriendsViewHolder extends RecyclerView.ViewHolder implements View.OnLongClickListener
     {
-        public TextView userName, fullName, message;
+        public TextView userName, fullName;
         public LinearLayout friendContainer;
 
         public FriendsViewHolder(View view)
@@ -64,10 +65,10 @@ public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.FriendsVie
     }
 
 
-    public FriendAdapter(Context mContext, List<Friend> messages, MessageAdapterListener listener)
+    public FriendAdapter(Context mContext, List<Friend> friends, FriendAdapterListener listener)
     {
         this.mContext = mContext;
-        this.messages = messages;
+        this.friends = friends;
         this.listener = listener;
         selectedItems = new SparseBooleanArray();
         animationItemsIndex = new SparseBooleanArray();
@@ -85,61 +86,61 @@ public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.FriendsVie
     @Override
     public void onBindViewHolder(final FriendsViewHolder holder, final int position)
     {
-        Friend friend = messages.get(position);
+        Friend friend = friends.get(position);
 
         // displaying text view data
-        holder.from.setText(message.getFrom());
-        holder.subject.setText(message.getSubject());
-        holder.message.setText(message.getMessage());
-        holder.timestamp.setText(message.getTimestamp());
-
-        // displaying the first letter of From in icon text
-        holder.iconText.setText(message.getFrom().substring(0, 1));
+        holder.userName.setText(friend.getUserName());
+        holder.fullName.setText(friend.getFullName());
 
         // change the row state to activated
         holder.itemView.setActivated(selectedItems.get(position, false));
 
-        // change the font style depending on message read status
-        applyReadStatus(holder, message);
-
-        // handle message star
-        applyImportant(holder, message);
-
-        // handle icon animation
-        applyIconAnimation(holder, position);
-
-        // display profile image
-        applyProfilePicture(holder, message);
-
+//        // change the font style depending on message read status
+//        applyReadStatus(holder, message);
+//
+//        // handle message star
+//        applyImportant(holder, message);
+//
+//        // handle icon animation
+//        applyIconAnimation(holder, position);
+//
+//        // display profile image
+//        applyProfilePicture(holder, message);
+//
         // apply click events
         applyClickEvents(holder, position);
     }
 
-    private void applyClickEvents(MyViewHolder holder, final int position) {
-        holder.iconContainer.setOnClickListener(new View.OnClickListener() {
+    private void applyClickEvents(FriendsViewHolder holder, final int position)
+    {
+
+        /**
+         * Set the callbacks for handling an click event
+         */
+        holder.friendContainer.setOnClickListener(new View.OnClickListener()
+        {
             @Override
-            public void onClick(View view) {
+            public void onClick(View view)
+            {
                 listener.onIconClicked(position);
             }
         });
 
-        holder.iconImp.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                listener.onIconImportantClicked(position);
-            }
-        });
 
-        holder.messageContainer.setOnClickListener(new View.OnClickListener() {
+        holder.friendContainer.setOnClickListener(new View.OnClickListener()
+        {
             @Override
-            public void onClick(View view) {
+            public void onClick(View view)
+            {
                 listener.onMessageRowClicked(position);
             }
         });
 
-        holder.messageContainer.setOnLongClickListener(new View.OnLongClickListener() {
+        holder.friendContainer.setOnLongClickListener(new View.OnLongClickListener()
+        {
             @Override
-            public boolean onLongClick(View view) {
+            public boolean onLongClick(View view)
+            {
                 listener.onRowLongClicked(position);
                 view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
                 return true;
@@ -147,44 +148,44 @@ public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.FriendsVie
         });
     }
 
-    private void applyProfilePicture(MyViewHolder holder, Message message) {
-        if (!TextUtils.isEmpty(message.getPicture())) {
-            Glide.with(mContext).load(message.getPicture())
-                    .thumbnail(0.5f)
-                    .crossFade()
-                    .transform(new CircleTransform(mContext))
-                    .diskCacheStrategy(DiskCacheStrategy.ALL)
-                    .into(holder.imgProfile);
-            holder.imgProfile.setColorFilter(null);
-            holder.iconText.setVisibility(View.GONE);
-        } else {
-            holder.imgProfile.setImageResource(R.drawable.bg_circle);
-            holder.imgProfile.setColorFilter(message.getColor());
-            holder.iconText.setVisibility(View.VISIBLE);
-        }
-    }
+//    private void applyProfilePicture(MyViewHolder holder, Message message) {
+//        if (!TextUtils.isEmpty(message.getPicture())) {
+//            Glide.with(mContext).load(message.getPicture())
+//                    .thumbnail(0.5f)
+//                    .crossFade()
+//                    .transform(new CircleTransform(mContext))
+//                    .diskCacheStrategy(DiskCacheStrategy.ALL)
+//                    .into(holder.imgProfile);
+//            holder.imgProfile.setColorFilter(null);
+//            holder.iconText.setVisibility(View.GONE);
+//        } else {
+//            holder.imgProfile.setImageResource(R.drawable.bg_circle);
+//            holder.imgProfile.setColorFilter(message.getColor());
+//            holder.iconText.setVisibility(View.VISIBLE);
+//        }
+//    }
 
-    private void applyIconAnimation(MyViewHolder holder, int position) {
-        if (selectedItems.get(position, false)) {
-            holder.iconFront.setVisibility(View.GONE);
-            resetIconYAxis(holder.iconBack);
-            holder.iconBack.setVisibility(View.VISIBLE);
-            holder.iconBack.setAlpha(1);
-            if (currentSelectedIndex == position) {
-                FlipAnimator.flipView(mContext, holder.iconBack, holder.iconFront, true);
-                resetCurrentIndex();
-            }
-        } else {
-            holder.iconBack.setVisibility(View.GONE);
-            resetIconYAxis(holder.iconFront);
-            holder.iconFront.setVisibility(View.VISIBLE);
-            holder.iconFront.setAlpha(1);
-            if ((reverseAllAnimations && animationItemsIndex.get(position, false)) || currentSelectedIndex == position) {
-                FlipAnimator.flipView(mContext, holder.iconBack, holder.iconFront, false);
-                resetCurrentIndex();
-            }
-        }
-    }
+//    private void applyIconAnimation(MyViewHolder holder, int position) {
+//        if (selectedItems.get(position, false)) {
+//            holder.iconFront.setVisibility(View.GONE);
+//            resetIconYAxis(holder.iconBack);
+//            holder.iconBack.setVisibility(View.VISIBLE);
+//            holder.iconBack.setAlpha(1);
+//            if (currentSelectedIndex == position) {
+//                FlipAnimator.flipView(mContext, holder.iconBack, holder.iconFront, true);
+//                resetCurrentIndex();
+//            }
+//        } else {
+//            holder.iconBack.setVisibility(View.GONE);
+//            resetIconYAxis(holder.iconFront);
+//            holder.iconFront.setVisibility(View.VISIBLE);
+//            holder.iconFront.setAlpha(1);
+//            if ((reverseAllAnimations && animationItemsIndex.get(position, false)) || currentSelectedIndex == position) {
+//                FlipAnimator.flipView(mContext, holder.iconBack, holder.iconFront, false);
+//                resetCurrentIndex();
+//            }
+//        }
+//    }
 
 
     // As the views will be reused, sometimes the icon appears as
@@ -195,46 +196,50 @@ public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.FriendsVie
         }
     }
 
-    public void resetAnimationIndex() {
+    public void resetAnimationIndex()
+    {
         reverseAllAnimations = false;
         animationItemsIndex.clear();
     }
 
     @Override
-    public long getItemId(int position) {
-        return messages.get(position).getId();
+    public long getItemId(int position)
+    {
+        return NO_ID;
     }
 
-    private void applyImportant(MyViewHolder holder, Message message) {
-        if (message.isImportant()) {
-            holder.iconImp.setImageDrawable(ContextCompat.getDrawable(mContext, R.drawable.ic_star_black_24dp));
-            holder.iconImp.setColorFilter(ContextCompat.getColor(mContext, R.color.icon_tint_selected));
-        } else {
-            holder.iconImp.setImageDrawable(ContextCompat.getDrawable(mContext, R.drawable.ic_star_border_black_24dp));
-            holder.iconImp.setColorFilter(ContextCompat.getColor(mContext, R.color.icon_tint_normal));
-        }
-    }
-
-    private void applyReadStatus(MyViewHolder holder, Message message) {
-        if (message.isRead()) {
-            holder.from.setTypeface(null, Typeface.NORMAL);
-            holder.subject.setTypeface(null, Typeface.NORMAL);
-            holder.from.setTextColor(ContextCompat.getColor(mContext, R.color.subject));
-            holder.subject.setTextColor(ContextCompat.getColor(mContext, R.color.message));
-        } else {
-            holder.from.setTypeface(null, Typeface.BOLD);
-            holder.subject.setTypeface(null, Typeface.BOLD);
-            holder.from.setTextColor(ContextCompat.getColor(mContext, R.color.from));
-            holder.subject.setTextColor(ContextCompat.getColor(mContext, R.color.subject));
-        }
-    }
+//    private void applyImportant(MyViewHolder holder, Message message) {
+//        if (message.isImportant()) {
+//            holder.iconImp.setImageDrawable(ContextCompat.getDrawable(mContext, R.drawable.ic_star_black_24dp));
+//            holder.iconImp.setColorFilter(ContextCompat.getColor(mContext, R.color.icon_tint_selected));
+//        } else {
+//            holder.iconImp.setImageDrawable(ContextCompat.getDrawable(mContext, R.drawable.ic_star_border_black_24dp));
+//            holder.iconImp.setColorFilter(ContextCompat.getColor(mContext, R.color.icon_tint_normal));
+//        }
+//    }
+//
+//    private void applyReadStatus(MyViewHolder holder, Message message) {
+//        if (message.isRead()) {
+//            holder.from.setTypeface(null, Typeface.NORMAL);
+//            holder.subject.setTypeface(null, Typeface.NORMAL);
+//            holder.from.setTextColor(ContextCompat.getColor(mContext, R.color.subject));
+//            holder.subject.setTextColor(ContextCompat.getColor(mContext, R.color.message));
+//        } else {
+//            holder.from.setTypeface(null, Typeface.BOLD);
+//            holder.subject.setTypeface(null, Typeface.BOLD);
+//            holder.from.setTextColor(ContextCompat.getColor(mContext, R.color.from));
+//            holder.subject.setTextColor(ContextCompat.getColor(mContext, R.color.subject));
+//        }
+//    }
 
     @Override
-    public int getItemCount() {
-        return messages.size();
+    public int getItemCount()
+    {
+        return friends.size();
     }
 
-    public void toggleSelection(int pos) {
+    public void toggleSelection(int pos)
+    {
         currentSelectedIndex = pos;
         if (selectedItems.get(pos, false)) {
             selectedItems.delete(pos);
@@ -272,7 +277,7 @@ public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.FriendsVie
 
     public void removeData(int position)
     {
-        messages.remove(position);
+        friends.remove(position);
         resetCurrentIndex();
     }
 
@@ -281,7 +286,7 @@ public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.FriendsVie
         currentSelectedIndex = -1;
     }
 
-    public interface MessageAdapterListener
+    public interface FriendAdapterListener
     {
         void onIconClicked(int position);
 
@@ -292,5 +297,3 @@ public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.FriendsVie
         void onRowLongClicked(int position);
     }
 }
-
-    }

@@ -4,7 +4,8 @@ import com.google.firebase.database.DatabaseReference;
 
 /**
  *
- * Abstract functionality for each gateway
+ * Abstract functionality for each class that interacts with the database.
+ *
  * @author isaacbuitrago
  */
 public abstract class Gateway
@@ -14,7 +15,7 @@ public abstract class Gateway
 
     public abstract <T> void write(T data);
 
-    public abstract <T> T fetch();
+    public abstract <T> T fetch(String id);
 
     public abstract boolean update();
 
