@@ -41,6 +41,7 @@
     <!-- Strings related to a sending a Bit-->
     <string name ="action_search"> Search </string>
     <string name ="action_delete"> Delete</string>
+    <string name ="action_send"> Send</string>
 
     <!-- Firebase Database Strings-->
     <string name ="dbname_connections"> connections</string>

@@ -4,9 +4,9 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:mContext="com.bitz.isaacbuitrago.bitz.Activities.SendBitActivity">
     <item
-        android:id="@+id/actionDelete"
+        android:id="@+id/actionSend"
         android:icon="@drawable/ic_delete_white_24dp"
         android:orderInCategory="100"
-        android:title="@string/action_delete"
+        android:title="@string/action_send"
         app:showAsAction="always" />
 </menu>

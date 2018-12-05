@@ -1,9 +1,14 @@
 package com.bitz.isaacbuitrago.bitz.View;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.res.ColorStateList;
+import android.os.Build;
+import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.util.SparseBooleanArray;
-import android.view.HapticFeedbackConstants;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,9 +16,11 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import com.bitz.isaacbuitrago.bitz.Model.Friend;
 import com.bitz.isaacbuitrago.bitz.R;
+
 import java.util.ArrayList;
 import java.util.List;
-import static android.view.View.NO_ID;
+
+import static android.content.ContentValues.TAG;
 
 /**
  * Adapter and ViewHolder for handling the display of a list of friends.
@@ -26,22 +33,20 @@ public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.FriendsVie
 
     private Context mContext;
     private List<Friend> friends;
-    private FriendAdapterListener listener;
+    private ItemClickListener listener;
     private SparseBooleanArray selectedItems;
 
-    // array used to perform multiple animation at once
-    private SparseBooleanArray animationItemsIndex;
-    private boolean reverseAllAnimations = false;
+    public interface ItemClickListener
+    {
+        void onItemRowClicked(View view, int position);
+    }
 
-    // index is used to animate only the selected row
-    // dirty fix, find a better solution
-    private static int currentSelectedIndex = -1;
-
-    public class FriendsViewHolder extends RecyclerView.ViewHolder implements View.OnLongClickListener
+    public class FriendsViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener
     {
         public TextView userName, fullName;
         public LinearLayout friendContainer;
 
+        @SuppressLint("ResourceAsColor")
         public FriendsViewHolder(View view)
         {
             super(view);
@@ -52,26 +57,30 @@ public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.FriendsVie
 
             friendContainer = (LinearLayout) view.findViewById(R.id.friendsContainer);
 
-            view.setOnLongClickListener(this);
+            view.setOnClickListener(this);
+
         }
 
         @Override
-        public boolean onLongClick(View view)
+        public void onClick(View view)
         {
-            listener.onRowLongClicked(getAdapterPosition());
-            view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
-            return true;
+            if(listener != null)
+                listener.onItemRowClicked(view, getAdapterPosition());
         }
     }
 
+    public Friend getItem(int position)
+    {
+        return friends.get(position);
+    }
 
-    public FriendAdapter(Context mContext, List<Friend> friends, FriendAdapterListener listener)
+
+    public FriendAdapter(Context mContext, List<Friend> friends, ItemClickListener listener)
     {
         this.mContext = mContext;
         this.friends = friends;
         this.listener = listener;
         selectedItems = new SparseBooleanArray();
-        animationItemsIndex = new SparseBooleanArray();
     }
 
     @Override
@@ -83,6 +92,7 @@ public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.FriendsVie
         return new FriendsViewHolder(itemView);
     }
 
+
     @Override
     public void onBindViewHolder(final FriendsViewHolder holder, final int position)
     {
@@ -92,8 +102,8 @@ public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.FriendsVie
         holder.userName.setText(friend.getUserName());
         holder.fullName.setText(friend.getFullName());
 
-        // change the row state to activated
-        holder.itemView.setActivated(selectedItems.get(position, false));
+    }
+
 
 //        // change the font style depending on message read status
 //        applyReadStatus(holder, message);
@@ -107,47 +117,6 @@ public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.FriendsVie
 //        // display profile image
 //        applyProfilePicture(holder, message);
 //
-        // apply click events
-        applyClickEvents(holder, position);
-    }
-
-    private void applyClickEvents(FriendsViewHolder holder, final int position)
-    {
-
-        /**
-         * Set the callbacks for handling an click event
-         */
-        holder.friendContainer.setOnClickListener(new View.OnClickListener()
-        {
-            @Override
-            public void onClick(View view)
-            {
-                listener.onIconClicked(position);
-            }
-        });
-
-
-        holder.friendContainer.setOnClickListener(new View.OnClickListener()
-        {
-            @Override
-            public void onClick(View view)
-            {
-                listener.onMessageRowClicked(position);
-            }
-        });
-
-        holder.friendContainer.setOnLongClickListener(new View.OnLongClickListener()
-        {
-            @Override
-            public boolean onLongClick(View view)
-            {
-                listener.onRowLongClicked(position);
-                view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
-                return true;
-            }
-        });
-    }
-
 //    private void applyProfilePicture(MyViewHolder holder, Message message) {
 //        if (!TextUtils.isEmpty(message.getPicture())) {
 //            Glide.with(mContext).load(message.getPicture())
@@ -164,11 +133,11 @@ public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.FriendsVie
 //            holder.iconText.setVisibility(View.VISIBLE);
 //        }
 //    }
-
-//    private void applyIconAnimation(MyViewHolder holder, int position) {
+//
+//    private void applyIconAnimation(FriendsViewHolder holder, int position) {
 //        if (selectedItems.get(position, false)) {
 //            holder.iconFront.setVisibility(View.GONE);
-//            resetIconYAxis(holder.iconBack);
+//            resetIconYAxis(holder);
 //            holder.iconBack.setVisibility(View.VISIBLE);
 //            holder.iconBack.setAlpha(1);
 //            if (currentSelectedIndex == position) {
@@ -188,24 +157,51 @@ public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.FriendsVie
 //    }
 
 
-    // As the views will be reused, sometimes the icon appears as
-    // flipped because older view is reused. Reset the Y-axis to 0
-    private void resetIconYAxis(View view) {
-        if (view.getRotationY() != 0) {
-            view.setRotationY(0);
-        }
-    }
-
-    public void resetAnimationIndex()
-    {
-        reverseAllAnimations = false;
-        animationItemsIndex.clear();
-    }
-
     @Override
     public long getItemId(int position)
     {
-        return NO_ID;
+        return friends.get(position).hashCode();
+    }
+
+    public void toggleSelection(int pos)
+    {
+        if (selectedItems.get(pos, false))
+        {
+            selectedItems.delete(pos);
+        }
+        else {
+            selectedItems.put(pos, true);
+        }
+
+        notifyItemChanged(pos);
+    }
+
+    public void clearSelections()
+    {
+        selectedItems.clear();
+        notifyDataSetChanged();
+    }
+
+    public int getSelectedItemCount()
+    {
+        return selectedItems.size();
+    }
+
+    public List<Integer> getSelectedItems()
+    {
+        List<Integer> items = new ArrayList<Integer>(selectedItems.size());
+
+        for (int i = 0; i < selectedItems.size(); i++)
+        {
+            items.add(selectedItems.keyAt(i));
+        }
+
+        return items;
+    }
+
+    public boolean inSelectionArray(int position)
+    {
+        return selectedItems.get(position, false);
     }
 
 //    private void applyImportant(MyViewHolder holder, Message message) {
@@ -238,62 +234,4 @@ public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.FriendsVie
         return friends.size();
     }
 
-    public void toggleSelection(int pos)
-    {
-        currentSelectedIndex = pos;
-        if (selectedItems.get(pos, false)) {
-            selectedItems.delete(pos);
-            animationItemsIndex.delete(pos);
-        } else {
-            selectedItems.put(pos, true);
-            animationItemsIndex.put(pos, true);
-        }
-        notifyItemChanged(pos);
-    }
-
-    public void clearSelections()
-    {
-        reverseAllAnimations = true;
-        selectedItems.clear();
-        notifyDataSetChanged();
-    }
-
-    public int getSelectedItemCount()
-    {
-        return selectedItems.size();
-    }
-
-    public List<Integer> getSelectedItems()
-    {
-        List<Integer> items = new ArrayList<>(selectedItems.size());
-
-        for (int i = 0; i < selectedItems.size(); i++)
-        {
-            items.add(selectedItems.keyAt(i));
-        }
-
-        return items;
-    }
-
-    public void removeData(int position)
-    {
-        friends.remove(position);
-        resetCurrentIndex();
-    }
-
-    private void resetCurrentIndex()
-    {
-        currentSelectedIndex = -1;
-    }
-
-    public interface FriendAdapterListener
-    {
-        void onIconClicked(int position);
-
-        void onIconImportantClicked(int position);
-
-        void onMessageRowClicked(int position);
-
-        void onRowLongClicked(int position);
-    }
 }

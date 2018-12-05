@@ -30,6 +30,11 @@ public class User
         this.username = username;
     }
 
+    /**
+     * Default constructor
+     */
+    public User(){}
+
 
     /**
      * getters and setters
