@@ -42,5 +42,14 @@
     <string name ="action_search"> Search </string>
     <string name ="action_delete"> Delete</string>
 
+    <!-- Firebase Database Strings-->
+    <string name ="dbname_connections"> connections</string>
+    <string name ="dbname_friends"> friends</string>
+    <string name ="dbname_users"> users</string>
+
+
+
+
+
 
 </resources>
