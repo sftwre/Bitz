@@ -8,17 +8,56 @@
     tools:context=".Activities.SendBitActivity"
     tools:showIn="@layout/activity_send_bit">
 
-
-    <android.support.v4.widget.SwipeRefreshLayout
-        android:id="@+id/swipe_refresh_layout"
+    <android.support.design.widget.BottomNavigationView
+        android:id="@+id/recipientsNavigationView"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="57dp"
+        android:background="@color/colorAccent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/friendsRecycleViewer">
 
-            <android.support.v7.widget.RecyclerView
-                android:id="@+id/friendsRecycleViewer"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent" />
 
-    </android.support.v4.widget.SwipeRefreshLayout>
+        <LinearLayout
+            android:id="@+id/recipientsLinearLayout"
+            android:layout_width="298dp"
+            android:layout_height="match_parent"
+            android:layout_marginRight="100dp"
+            android:orientation="horizontal">
+
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/sendButton"
+            android:layout_width="wrap_content"
+            android:layout_height="31dp"
+            android:layout_marginBottom="10dp"
+            android:layout_marginLeft="300dp"
+            android:layout_marginRight="5dp"
+            android:layout_marginTop="10dp"
+            android:layout_weight="1"
+            android:background="@drawable/roundedbutton"
+            android:text="@string/action_send"
+            android:textAppearance="@style/TextAppearance.AppCompat.Body2"
+            android:textColor="@color/colorWhite"
+            android:textStyle="normal" />
+
+    </android.support.design.widget.BottomNavigationView>
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/friendsRecycleViewer"
+        android:layout_width="match_parent"
+        android:layout_height="460dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        app:layout_constraintBottom_toTopOf="@+id/recipientsNavigationView"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+    </android.support.v7.widget.RecyclerView>
 
 </android.support.constraint.ConstraintLayout>
