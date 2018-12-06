@@ -57,6 +57,8 @@ public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.FriendsVie
 
             friendContainer = (LinearLayout) view.findViewById(R.id.friendsContainer);
 
+            friendContainer.setOnClickListener(this);
+
             view.setOnClickListener(this);
 
         }

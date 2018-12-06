@@ -2,11 +2,14 @@ package com.bitz.isaacbuitrago.bitz.Activities;
 
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
-import android.graphics.PorterDuff;
+import android.graphics.Color;
+import android.graphics.Typeface;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.annotation.RequiresApi;
+import android.support.design.widget.BottomNavigationView;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
@@ -17,6 +20,9 @@ import android.view.ActionMode;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 import com.bitz.isaacbuitrago.bitz.Model.Friend;
 import com.bitz.isaacbuitrago.bitz.Model.User;
@@ -28,46 +34,56 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+
+import java.lang.annotation.Target;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Predicate;
+
 import static android.support.constraint.Constraints.TAG;
+import static android.view.View.SYSTEM_UI_FLAG_HIDE_NAVIGATION;
 
 
 /**
  *
- * Responsible for displaying
- * friends the user can send the
- * bit to, managing the selected friends,
- * and sending the bit.
+ * Responsible for displaying friends to the user,
+ * managing selected friends in a Contextual Action Bar,
+ * and allowing the user to send the bit.
  *
  * @author isaacbuitrago
  *
  */
-public class SendBitActivity extends AppCompatActivity implements SwipeRefreshLayout.OnRefreshListener, FriendAdapter.ItemClickListener
+public class SendBitActivity extends AppCompatActivity implements FriendAdapter.ItemClickListener
 {
 
 
-    // UI
+    // UI references
     private RecyclerView mRecyclerView;
 
     private FriendAdapter mfriendAdapter;
 
-    private SwipeRefreshLayout swipeRefreshLayout;  // defines action when user refreshes the view
+    private BottomNavigationView recipientsNavigationView;
 
-    // data lists
-    private List<Friend> friendsList;               // list of all friends for the user
+    private LinearLayout recipientsLinearLayout;
 
-    private List<Friend> recipients;                // list of friends that can receive the Bit
+    private Button sendButton;
 
-    private ActionModeCallback actionModeCallback;
+    // data
+    private List<Friend> friendsList;               // list of friends for current user
 
-    private ActionMode actionMode;
+    private List<Friend> recipients;                // recipients that will receive the Bit
 
+    private  Map<Integer, Integer> recipientsMapping;   // mapping of item position in recyclerview to position in a LinearLayout
 
-    // database
+    // database reference
     private DatabaseReference mFriendsReference;
 
+    /**
+     *
+     * @param savedInstanceState
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
@@ -75,29 +91,30 @@ public class SendBitActivity extends AppCompatActivity implements SwipeRefreshLa
 
         setContentView(R.layout.activity_send_bit);
 
+        // bind UI references
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
 
-        setSupportActionBar(toolbar);
+        recipientsNavigationView = (BottomNavigationView) findViewById(R.id.recipientsNavigationView);
 
-        // set the recycler view
+        recipientsLinearLayout = (LinearLayout) findViewById(R.id.recipientsLinearLayout);
+
+        sendButton = (Button) findViewById(R.id.sendButton);
+
+        sendButton.setOnClickListener(mOnClickListener);
+
         mRecyclerView = (RecyclerView) findViewById(R.id.friendsRecycleViewer);
 
-        // use this setting to improve performance if you know that changes
-        // in content do not change the layout size of the RecyclerView
         mRecyclerView.setHasFixedSize(true);
-
-        // use a linear layout manager
-        swipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swipe_refresh_layout);
-        swipeRefreshLayout.setOnRefreshListener(this);
 
         recipients = new ArrayList<Friend>();
 
         friendsList = new ArrayList<Friend>();
 
+        recipientsMapping = new HashMap<Integer, Integer>();
+
         mfriendAdapter = new FriendAdapter(this, friendsList, this);
 
-        // Initialize the recycler view
-        RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(this);
+        LinearLayoutManager mLayoutManager = new LinearLayoutManager(this);
 
         mRecyclerView.setLayoutManager(mLayoutManager);
 
@@ -107,29 +124,40 @@ public class SendBitActivity extends AppCompatActivity implements SwipeRefreshLa
 
         mRecyclerView.setAdapter(mfriendAdapter);
 
-        // create the action mode
-        actionModeCallback = new ActionModeCallback();
-
         // Initialize the Database
         mFriendsReference = FirebaseDatabase.getInstance().getReference().child(getString(R.string.dbname_connections));
 
+        setSupportActionBar(toolbar);
+
     }
 
+    /**
+     *
+     *
+     * Called when activity started
+     */
     @Override
     protected void onStart()
     {
         super.onStart();
 
         // show loader and fetch friends
-        swipeRefreshLayout.post(
-                new Runnable()
-                {
-                    @Override
-                    public void run()
-                    {
-                        getFriends();
-                    }
-                });
+        AsyncTask<Void, Void, Void> getFriendsTask = new AsyncTask<Void, Void, Void>()
+        {
+            @Override
+            protected Void doInBackground(Void... voids)
+            {
+                getFriends();
+
+                return null;
+            }
+        };
+
+        // fetch the friends in the background
+        getFriendsTask.execute();
+
+        recipientsNavigationView.setVisibility(View.INVISIBLE);
+
     }
 
     /**
@@ -139,8 +167,6 @@ public class SendBitActivity extends AppCompatActivity implements SwipeRefreshLa
      */
     private void getFriends()
     {
-        swipeRefreshLayout.setRefreshing(true);
-
 
         mFriendsReference.child("NnwEQnJGt8cAejwlYTTmKOU1QMY2")
                 .child(getString(R.string.dbname_friends))
@@ -202,6 +228,7 @@ public class SendBitActivity extends AppCompatActivity implements SwipeRefreshLa
                              });
                 }
 
+
                 Log.i(TAG, "Fetched all friends");
             }
 
@@ -214,7 +241,6 @@ public class SendBitActivity extends AppCompatActivity implements SwipeRefreshLa
 
         });
 
-        swipeRefreshLayout.setRefreshing(false);
     }
 
     /**
@@ -222,42 +248,63 @@ public class SendBitActivity extends AppCompatActivity implements SwipeRefreshLa
      */
     private void sendBit()
     {
-
+//        for(Friend f : recipients)
+//        {
+//
+//        }
     }
 
-    @TargetApi(Build.VERSION_CODES.M)
+    /**
+     *
+     * Handles interaction with Send Button
+     */
+    View.OnClickListener mOnClickListener = (view) -> {sendBit();};
+
+
     @Override
     public void onItemRowClicked(View view, int position)
     {
         // get the friend and add it to the recipients
         Friend friend = mfriendAdapter.getItem(position);
 
-        this.recipients.add(friend);
-
-        // start the action mode if not already started
-        if(actionMode == null)
-        {
-            actionMode = startActionMode(actionModeCallback);
-        }
-
-        // if the view has already been selected, remove the highlighting
+        // item already selected, remove from recipients view and list
         if(mfriendAdapter.inSelectionArray(position))
         {
-            view.setSelected(false);
+           View v = recipientsLinearLayout.findViewById(position);
 
-            view.setBackgroundColor(0);
+            recipientsLinearLayout.removeView(v);
+
+            Log.i(TAG, String.format("%s removed", friend.toString()));
         }
         else
         {
-            view.setSelected(true);
+            // item has just been selected, add it to the recipients view and list
 
-            view.setBackgroundColor(getColor(R.color.text_color));
+            TextView textView = new TextView(this);
+
+            if(recipientsLinearLayout.getChildCount() > 0)
+            {
+                textView.setText( String.format(", %s", friend.getUserName()));
+            }
+            else {
+                textView.setText(friend.getUserName());
+            }
+
+            textView.setTextColor(Color.WHITE);
+
+            textView.setTypeface(Typeface.DEFAULT_BOLD);
+
+            textView.setId(position);
+
+            recipientsLinearLayout.addView(textView);
+
+            recipients.add(friend);
+
+            Log.i(TAG, String.format("Added %s as a recipient" , friend.toString()));
         }
 
-        // toggle the selection
+        // add/ remove the friend from the Contextual Action Bar
         toggleSelection(position);
-
-        Log.i(TAG, String.format("Added %s as a recipient" , friend.toString()));
     }
 
     /**
@@ -272,15 +319,17 @@ public class SendBitActivity extends AppCompatActivity implements SwipeRefreshLa
     {
         mfriendAdapter.toggleSelection(position);
 
-        if(mfriendAdapter.getSelectedItemCount() == 0)
+        if(recipientsNavigationView.getVisibility() == View.INVISIBLE)
         {
-            actionMode.finish();
+            recipientsNavigationView.setVisibility(View.VISIBLE);
         }
-        else
+        else if(mfriendAdapter.getSelectedItemCount() == 0)
         {
-            actionMode.setTitle("");
+            recipientsNavigationView.setVisibility(View.INVISIBLE);
         }
+
     }
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu)
@@ -308,24 +357,10 @@ public class SendBitActivity extends AppCompatActivity implements SwipeRefreshLa
         return super.onOptionsItemSelected(item);
     }
 
-    @Override
-    public void onRefresh()
-    {
-        // swipe refresh is performed, fetch the messages again
-        getFriends();
-    }
-
-//    @Override
-//    public void onIconClicked(int position)
-//    {
-//        if (actionMode == null)
-//        {
-//            actionMode = startSupportActionMode(actionModeCallback);
-//        }
-//
-//        toggleSelection(position);
-//    }
-
+    /**
+     *
+     * Callback for handling ActionMode setup and usage
+     */
     private class ActionModeCallback implements ActionMode.Callback
     {
 
@@ -336,7 +371,6 @@ public class SendBitActivity extends AppCompatActivity implements SwipeRefreshLa
             mode.getMenuInflater().inflate(R.menu.menu_action_mode, menu);
 
             // disable swipe refresh if action mode is enabled
-            swipeRefreshLayout.setEnabled(false);
             return true;
         }
 
@@ -366,7 +400,6 @@ public class SendBitActivity extends AppCompatActivity implements SwipeRefreshLa
         {
             mfriendAdapter.clearSelections();
 
-            actionMode = null;
         }
     }
 
