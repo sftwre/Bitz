@@ -1,6 +1,7 @@
 package com.bitz.isaacbuitrago.bitz.Model;
 
 import java.io.Serializable;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 
 /**
@@ -11,19 +12,23 @@ import java.util.HashMap;
 public class Bit implements Serializable
 {
 
-    private long startTime;         // start time of a Bit
+    private long startTime;             // start time of a Bit
 
-    private long endTime;           // end time of a Bit
+    private long endTime;               // end time of a Bit
 
-    private  String trackTitle;     // title of the Track
+    private  String trackTitle;         // title of the Track
 
-    private  String artist;         // name of artist
+    private  String artist;             // name of artist
 
-    private  String platform;       // streaming platform the track is on
+    private  String platform;           // streaming platform the track is on
 
-    private BitState state;         // Bit state, either recording or stopped
+    private BitState state;             // Bit state, either recording or stopped
 
-    private boolean dirty;          // dirty flag
+    private LocalDateTime dateCreated;  // date of creation
+
+    private int bitId;                  // unique id of the Bit
+
+    private boolean dirty;              // dirty flag
 
 
     // set the active Bit states in a Bit
@@ -165,6 +170,22 @@ public class Bit implements Serializable
     public void setDirty(boolean dirty)
     {
         this.dirty = dirty;
+    }
+
+    public LocalDateTime getDateCreated() {
+        return dateCreated;
+    }
+
+    public void setDateCreated(LocalDateTime dateCreated) {
+        this.dateCreated = dateCreated;
+    }
+
+    public int getBitId() {
+        return bitId;
+    }
+
+    public void setBitId(int bitId) {
+        this.bitId = bitId;
     }
 
     /**
