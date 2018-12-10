@@ -36,11 +36,6 @@ public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.FriendsVie
     private ItemClickListener listener;
     private SparseBooleanArray selectedItems;
 
-    public interface ItemClickListener
-    {
-        void onItemRowClicked(View view, int position);
-    }
-
     public class FriendsViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener
     {
         public TextView userName, fullName;
