@@ -21,13 +21,13 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import com.bitz.isaacbuitrago.bitz.Model.Bit;
 import com.bitz.isaacbuitrago.bitz.Model.Friend;
 import com.bitz.isaacbuitrago.bitz.Model.User;
 import com.bitz.isaacbuitrago.bitz.R;
 import com.bitz.isaacbuitrago.bitz.View.DividerItemDecoration;
 import com.bitz.isaacbuitrago.bitz.View.FriendAdapter;
+import com.bitz.isaacbuitrago.bitz.View.ItemClickListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -35,7 +35,6 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -53,9 +52,8 @@ import static android.support.constraint.Constraints.TAG;
  * @author isaacbuitrago
  *
  */
-public class SendBitActivity extends AppCompatActivity implements FriendAdapter.ItemClickListener
+public class SendBitActivity extends AppCompatActivity implements ItemClickListener
 {
-
 
     // UI references
     private RecyclerView mRecyclerView;
@@ -69,11 +67,9 @@ public class SendBitActivity extends AppCompatActivity implements FriendAdapter.
     private Button sendButton;
 
     // data
-    private List<Friend> friendsList;               // list of friends for current user
+    private List<Friend> friendsList;                   // list of friends for current user
 
-    private List<Friend> recipients;                // recipients that will receive the Bit
-
-    private  Map<Integer, Integer> recipientsMapping;   // mapping of item position in recyclerview to position in a LinearLayout
+    private List<Friend> recipients;                    // recipients that will receive the Bit
 
     private Bit bit;                                    // bit to send
 
@@ -113,8 +109,6 @@ public class SendBitActivity extends AppCompatActivity implements FriendAdapter.
         recipients = new ArrayList<Friend>();
 
         friendsList = new ArrayList<Friend>();
-
-        recipientsMapping = new HashMap<Integer, Integer>();
 
         mfriendAdapter = new FriendAdapter(this, friendsList, this);
 

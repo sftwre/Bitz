@@ -29,7 +29,9 @@ public class Bit implements Serializable
 
     private LocalDateTime dateCreated;  // date of creation
 
-    private String bitId;                  // unique id
+    private String bitId;               // unique id of Bit
+
+    private String sendingUser;         // username of sender
 
     private boolean dirty;              // dirty flag
 
@@ -186,6 +188,14 @@ public class Bit implements Serializable
 
     public void setBitId(String bitId) {
         this.bitId = bitId;
+    }
+
+    public String getSendingUser() {
+        return sendingUser;
+    }
+
+    public void setSendingUser(String sendingUser) {
+        this.sendingUser = sendingUser;
     }
 
     /**

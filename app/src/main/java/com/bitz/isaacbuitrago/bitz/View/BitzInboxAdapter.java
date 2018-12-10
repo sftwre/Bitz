@@ -1,5 +1,6 @@
 package com.bitz.isaacbuitrago.bitz.View;
 
+import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -7,8 +8,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-
+import com.bitz.isaacbuitrago.bitz.Model.Bit;
 import com.bitz.isaacbuitrago.bitz.R;
+import java.util.List;
 
 /**
  *
@@ -19,12 +21,21 @@ import com.bitz.isaacbuitrago.bitz.R;
 public class BitzInboxAdapter extends RecyclerView.Adapter<BitzInboxAdapter.BitzViewHolder>
 {
 
-    /**
-     *
-     */
-    public BitzInboxAdapter()
-    {
+    Context mContext;
+    List<Bit> bitz;
+    ItemClickListener listener;
 
+
+    /**
+     * Constructor
+     */
+    public BitzInboxAdapter(Context mContext, List<Bit> bitz, ItemClickListener listener)
+    {
+        this.mContext = mContext;
+
+        this.bitz = bitz;
+
+        this.listener = listener;
     }
 
     @NonNull
@@ -38,15 +49,22 @@ public class BitzInboxAdapter extends RecyclerView.Adapter<BitzInboxAdapter.Bitz
     }
 
     @Override
-    public void onBindViewHolder(@NonNull BitzViewHolder viewHolder, int i)
+    public void onBindViewHolder(@NonNull BitzViewHolder viewHolder, int position)
     {
+        Bit bit = bitz.get(position);
+
+        viewHolder.artistTextView.setText(bit.getArtist());
+
+        viewHolder.userNameTextView.setText(bit.getSendingUser());
+
+        viewHolder.titleTextView.setText(bit.getTrackTitle());
 
     }
 
     @Override
     public int getItemCount()
     {
-        return 0;
+        return bitz.size();
     }
 
     /**
@@ -71,12 +89,15 @@ public class BitzInboxAdapter extends RecyclerView.Adapter<BitzInboxAdapter.Bitz
             userNameTextView = itemView.findViewById(R.id.userNameTextView);
 
             albumCoverImageView = itemView.findViewById(R.id.albumCoverImageView);
+
+            itemView.setOnClickListener(this);
         }
 
         @Override
         public void onClick(View v)
         {
-
+            if(listener != null)
+                listener.onItemRowClicked(v, getAdapterPosition());
         }
     }
 
