@@ -59,6 +59,8 @@ public class VerifyBit extends AppCompatActivity
             // Start the SendBit activity
             Intent intent = new Intent(VerifyBit.this, SendBitActivity.class);
 
+            intent.putExtra("Bit", bit);
+
             startActivity(intent);
         }
     };

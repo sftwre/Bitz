@@ -27,7 +27,7 @@
     <string name="prompt_user_name">Username</string>
     <string name="prompt_email">Email</string>
     <string name="prompt_pass">Password</string>
-    <string name="action_create_account">Create account</string>
+    <string name="action_create_account">No Account yet ? Create one</string>
 
 
     <!-- Strings related to a Bit -->
@@ -39,18 +39,20 @@
     <string name="title_activity_create">Create Account</string>
 
     <!-- Strings related to a sending a Bit-->
-    <string name ="action_search"> Search </string>
-    <string name ="action_delete"> Delete</string>
-    <string name ="action_send"> Send</string>
+    <string name="action_search"> Search </string>
+    <string name="action_delete"> Delete</string>
+    <string name="action_send"> Send</string>
 
     <!-- Firebase Database Strings-->
-    <string name ="dbname_connections"> connections</string>
-    <string name ="dbname_friends"> friends</string>
-    <string name ="dbname_users"> users</string>
+    <string name="dbname_connections"> connections</string>
+    <string name="dbname_friends"> friends</string>
+    <string name="dbname_users"> users</string>
+    <string name="dbname_bitzInbox"> bitzInbox</string>
+    <string name="dbname_bitz"> bitz</string>
+    <string name="title_activity_home">HomeActivity</string>
 
-
-
-
-
+    <!-- Firebase messages -->
+    <string name="auth_failed">Failed to Authenticate</string>
+    <string name="auth_success">Authentication Success</string>
 
 </resources>

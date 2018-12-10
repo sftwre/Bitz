@@ -1,14 +1,11 @@
 package com.bitz.isaacbuitrago.bitz.Activities;
 
-import android.annotation.SuppressLint;
-import android.annotation.TargetApi;
+import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.annotation.RequiresApi;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
@@ -24,26 +21,27 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.bitz.isaacbuitrago.bitz.Model.Bit;
 import com.bitz.isaacbuitrago.bitz.Model.Friend;
 import com.bitz.isaacbuitrago.bitz.Model.User;
 import com.bitz.isaacbuitrago.bitz.R;
 import com.bitz.isaacbuitrago.bitz.View.DividerItemDecoration;
 import com.bitz.isaacbuitrago.bitz.View.FriendAdapter;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
-import java.lang.annotation.Target;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Predicate;
 
 import static android.support.constraint.Constraints.TAG;
-import static android.view.View.SYSTEM_UI_FLAG_HIDE_NAVIGATION;
 
 
 /**
@@ -77,8 +75,14 @@ public class SendBitActivity extends AppCompatActivity implements FriendAdapter.
 
     private  Map<Integer, Integer> recipientsMapping;   // mapping of item position in recyclerview to position in a LinearLayout
 
-    // database reference
+    private Bit bit;                                    // bit to send
+
+    // Firbase references
     private DatabaseReference mFriendsReference;
+    private FirebaseAuth mAuth;
+    private FirebaseAuth.AuthStateListener mAuthListener;
+    private FirebaseUser sendingUser;
+
 
     /**
      *
@@ -140,6 +144,14 @@ public class SendBitActivity extends AppCompatActivity implements FriendAdapter.
     protected void onStart()
     {
         super.onStart();
+
+        // get the Bit from the Intent
+        this.bit = (Bit) getIntent().getSerializableExtra("Bit");
+
+        // set up Firebase auth and the auth state listener
+        setupFirebaseAuth();
+
+        mAuth.addAuthStateListener(mAuthListener);
 
         // show loader and fetch friends
         AsyncTask<Void, Void, Void> getFriendsTask = new AsyncTask<Void, Void, Void>()
@@ -244,14 +256,88 @@ public class SendBitActivity extends AppCompatActivity implements FriendAdapter.
     }
 
     /**
+     * Stores the Bit in the Database, sends it to each listed recipient,
+     * and closes the BottomNavigationView.
      *
      */
     private void sendBit()
     {
-//        for(Friend f : recipients)
-//        {
-//
-//        }
+        final String bitzPath;
+
+        // create a new node for the Bit in the database
+        String bitId = mFriendsReference.child(getString(R.string.dbname_bitz)).push().getKey();
+
+        String senderId = sendingUser.getUid();
+
+        // store Bit in collection of Bitz
+        bitzPath = String.format("/%s/%s", getString(R.string.dbname_bitz), bitId);
+
+        mFriendsReference.child(bitzPath).setValue(bit);
+
+        // update Bitz collection and inbox for each recipient
+        Map<String, Object> childUpdates = new HashMap<String, Object>();
+
+        for (Friend recipient : recipients)
+        {
+            String recipientPath = String.format("/%s/%s/%s", getString(R.string.dbname_bitzInbox), recipient.getId(), senderId);
+
+            childUpdates.put(recipientPath, bitId);
+        }
+
+        mFriendsReference.updateChildren(childUpdates);
+
+        // hide the bottom navigation view
+        recipientsNavigationView.setVisibility(View.INVISIBLE);
+
+        // TODO transition to another activity
+    }
+
+    /**
+     * Setup the firebase auth object
+     */
+    private void setupFirebaseAuth()
+    {
+        Log.d(TAG, "setupFirebaseAuth: setting up firebase auth.");
+
+        mAuth = FirebaseAuth.getInstance();
+
+        mAuthListener = new FirebaseAuth.AuthStateListener()
+        {
+            @Override
+            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth)
+            {
+                FirebaseUser user = firebaseAuth.getCurrentUser();
+
+                //check if the user is logged in
+                checkCurrentUser(user);
+
+                // set the current user
+
+                sendingUser = user;
+            }
+        };
+    }
+
+    /**
+     * checks to see if the @param 'user' is logged in
+     * and starts the Login activity if they are not.
+     *
+     * @param user
+     */
+    private void checkCurrentUser(FirebaseUser user)
+    {
+        Log.d(TAG, "checkCurrentUser: checking if user is logged in.");
+
+        if (user == null)
+        {
+            Log.d(TAG, "checkCurrentUser: Opening Login Activity");
+
+            Intent intent = new Intent(SendBitActivity.this, LoginActivity.class);
+
+            startActivity(intent);
+
+            this.finish();
+        }
     }
 
     /**
@@ -261,6 +347,11 @@ public class SendBitActivity extends AppCompatActivity implements FriendAdapter.
     View.OnClickListener mOnClickListener = (view) -> {sendBit();};
 
 
+    /**
+     * Handels selection of items in RecyclerView
+     * @param view
+     * @param position
+     */
     @Override
     public void onItemRowClicked(View view, int position)
     {
