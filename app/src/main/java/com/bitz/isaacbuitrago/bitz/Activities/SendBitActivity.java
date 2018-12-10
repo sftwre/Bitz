@@ -129,7 +129,7 @@ public class SendBitActivity extends AppCompatActivity implements FriendAdapter.
         mRecyclerView.setAdapter(mfriendAdapter);
 
         // Initialize the Database
-        mFriendsReference = FirebaseDatabase.getInstance().getReference().child(getString(R.string.dbname_connections));
+        mFriendsReference = FirebaseDatabase.getInstance().getReference();
 
         setSupportActionBar(toolbar);
 
@@ -169,18 +169,19 @@ public class SendBitActivity extends AppCompatActivity implements FriendAdapter.
         getFriendsTask.execute();
 
         recipientsNavigationView.setVisibility(View.INVISIBLE);
-
     }
 
     /**
-     * Fetches friends of the current user
-     * and populates a list of friends to display
-     * in the recycler view.
+     * Fetches friends for the current user
+     * and displays them in the recycler view.
      */
     private void getFriends()
     {
+        sendingUser = FirebaseAuth.getInstance().getCurrentUser();
 
-        mFriendsReference.child("NnwEQnJGt8cAejwlYTTmKOU1QMY2")
+        mFriendsReference
+                .child(getString(R.string.dbname_connections))
+                .child(sendingUser.getUid())
                 .child(getString(R.string.dbname_friends))
                 .addValueEventListener(new ValueEventListener()
         {
@@ -264,22 +265,26 @@ public class SendBitActivity extends AppCompatActivity implements FriendAdapter.
     {
         final String bitzPath;
 
-        // create a new node for the Bit in the database
+        // create a new Bit in the database
         String bitId = mFriendsReference.child(getString(R.string.dbname_bitz)).push().getKey();
 
-        String senderId = sendingUser.getUid();
+        bit.setBitId(bitId);
 
-        // store Bit in collection of Bitz
         bitzPath = String.format("/%s/%s", getString(R.string.dbname_bitz), bitId);
 
+        // store Bit in the Database
         mFriendsReference.child(bitzPath).setValue(bit);
 
-        // update Bitz collection and inbox for each recipient
+
+        // update inbox for each recipient so they have the id of Bit sent to them
         Map<String, Object> childUpdates = new HashMap<String, Object>();
 
         for (Friend recipient : recipients)
         {
-            String recipientPath = String.format("/%s/%s/%s", getString(R.string.dbname_bitzInbox), recipient.getId(), senderId);
+            String recipientPath = String.format("/%s/%s/%s",
+                    getString(R.string.dbname_bitzInbox),
+                    recipient.getId(),
+                    sendingUser.getUid());
 
             childUpdates.put(recipientPath, bitId);
         }
@@ -290,6 +295,7 @@ public class SendBitActivity extends AppCompatActivity implements FriendAdapter.
         recipientsNavigationView.setVisibility(View.INVISIBLE);
 
         // TODO transition to another activity
+
     }
 
     /**
@@ -312,7 +318,6 @@ public class SendBitActivity extends AppCompatActivity implements FriendAdapter.
                 checkCurrentUser(user);
 
                 // set the current user
-
                 sendingUser = user;
             }
         };

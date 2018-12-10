@@ -1,5 +1,7 @@
 package com.bitz.isaacbuitrago.bitz.Model;
 
+import android.support.annotation.Keep;
+
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -12,30 +14,28 @@ import java.util.HashMap;
 public class Bit implements Serializable
 {
 
-    private long startTime;             // start time of a Bit
+    private long startTime;             // start time of a Bit in ms
 
-    private long endTime;               // end time of a Bit
+    private long endTime;               // end time of a Bit in ms
 
     private  String trackTitle;         // title of the Track
 
-    private  String artist;             // name of artist
+    private  String artist;             // artist that created track
 
     private  String platform;           // streaming platform the track is on
 
-    private BitState state;             // Bit state, either recording or stopped
+    @Keep
+    private transient BitState state;   // Bit state, either recording or stopped
 
     private LocalDateTime dateCreated;  // date of creation
 
-    private int bitId;                  // unique id of the Bit
+    private String bitId;                  // unique id
 
     private boolean dirty;              // dirty flag
 
 
     // set the active Bit states in a Bit
-
-    private static HashMap<String, BitState> states =
-
-            new HashMap<String, BitState>();
+    private static HashMap<String, BitState> states = new HashMap<String, BitState>();
 
 
     /**
@@ -180,11 +180,11 @@ public class Bit implements Serializable
         this.dateCreated = dateCreated;
     }
 
-    public int getBitId() {
+    public String getBitId() {
         return bitId;
     }
 
-    public void setBitId(int bitId) {
+    public void setBitId(String bitId) {
         this.bitId = bitId;
     }
 
@@ -192,6 +192,7 @@ public class Bit implements Serializable
      *
      * @return String representation of the Bit
      */
+    @Override
     public String toString()
     {
         return (String.format("Track %s, Artist %s, platform %s, StartTime %d, EndTime %d",

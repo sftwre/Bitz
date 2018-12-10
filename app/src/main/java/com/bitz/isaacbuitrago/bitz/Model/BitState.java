@@ -9,9 +9,6 @@ import java.io.Serializable;
  */
 public abstract class BitState implements Serializable
 {
-
-    // TODO decouple the Bit userName the Spotify API
-
     /**
      * Used to set the timestamp of a Track
      *
