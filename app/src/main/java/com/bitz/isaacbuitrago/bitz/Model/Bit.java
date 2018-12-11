@@ -33,6 +33,8 @@ public class Bit implements Serializable
 
     private String sendingUser;         // username of sender
 
+    private String coverImageUrl;       // URL of album cover for Track
+
     private boolean dirty;              // dirty flag
 
 
@@ -196,6 +198,14 @@ public class Bit implements Serializable
 
     public void setSendingUser(String sendingUser) {
         this.sendingUser = sendingUser;
+    }
+
+    public String getCoverImageUrl() {
+        return coverImageUrl;
+    }
+
+    public void setCoverImageUrl(String coverImageUrl) {
+        this.coverImageUrl = coverImageUrl;
     }
 
     /**

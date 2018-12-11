@@ -59,6 +59,7 @@ public class BitzInboxAdapter extends RecyclerView.Adapter<BitzInboxAdapter.Bitz
 
         viewHolder.titleTextView.setText(bit.getTrackTitle());
 
+        // TODO dowload album cover
     }
 
     @Override
