@@ -39,7 +39,7 @@ public class VerifyBit extends AppCompatActivity
 
     private SpotifyAppRemote mSpotifyAppRemote; // connection to Spotify
 
-    private final ScheduledExecutorService schedualer =
+    private final ScheduledExecutorService scheduler =
             Executors.newScheduledThreadPool(1);
 
 
@@ -166,7 +166,7 @@ public class VerifyBit extends AppCompatActivity
             Instant start = Instant.now();
 
             // schedule task to stop player after wait time
-            ScheduledFuture<?> handler = schedualer.schedule(() ->
+            ScheduledFuture<?> handler = scheduler.schedule(() ->
                     {
                         playerApi.pause();
 
@@ -180,7 +180,7 @@ public class VerifyBit extends AppCompatActivity
                     }
                     , waitTime, TimeUnit.MILLISECONDS);
 
-            schedualer.schedule(() -> handler.cancel(false), waitTime, TimeUnit.MILLISECONDS);
+            scheduler.schedule(() -> handler.cancel(false), waitTime, TimeUnit.MILLISECONDS);
         }
 
         // play track userName start time
