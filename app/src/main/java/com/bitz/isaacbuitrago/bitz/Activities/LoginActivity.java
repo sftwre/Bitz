@@ -322,10 +322,9 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
                             }
                             else{
-
                                 Log.d(TAG, "onComplete: success. email is verified.");
 
-                                Intent intent = new Intent(LoginActivity.this, SendBitActivity.class);
+                                Intent intent = new Intent(LoginActivity.this, BitzInboxActivity.class);
 
                                 startActivity(intent);
 

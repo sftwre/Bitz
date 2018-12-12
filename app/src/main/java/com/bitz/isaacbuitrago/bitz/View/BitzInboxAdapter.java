@@ -1,6 +1,7 @@
 package com.bitz.isaacbuitrago.bitz.View;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -10,6 +11,11 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import com.bitz.isaacbuitrago.bitz.Model.Bit;
 import com.bitz.isaacbuitrago.bitz.R;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import java.util.List;
 
 /**
@@ -24,6 +30,7 @@ public class BitzInboxAdapter extends RecyclerView.Adapter<BitzInboxAdapter.Bitz
     Context mContext;
     List<Bit> bitz;
     ItemClickListener listener;
+    DatabaseReference mDatabase;
 
 
     /**
@@ -36,6 +43,8 @@ public class BitzInboxAdapter extends RecyclerView.Adapter<BitzInboxAdapter.Bitz
         this.bitz = bitz;
 
         this.listener = listener;
+
+        mDatabase = FirebaseDatabase.getInstance().getReference();
     }
 
     @NonNull

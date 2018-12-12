@@ -1,12 +1,6 @@
 package com.bitz.isaacbuitrago.bitz.Model;
 
-
-import android.support.annotation.Keep;
-
 import com.google.firebase.database.Exclude;
-import com.google.firebase.database.IgnoreExtraProperties;
-import com.google.firebase.database.annotations.Nullable;
-
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -14,7 +8,7 @@ import java.util.HashMap;
 /**
  * Copyright Isaac Buitrago 2018, All rights reserved
  *
- * Represents data about a track which can be shared
+ * Represents data about a track that can be shared
  */
 public class Bit implements Serializable
 {
@@ -38,6 +32,9 @@ public class Bit implements Serializable
     private String sendingUser;         // username of sender
 
     private String coverImageUrl;       // URL of album cover for Track
+
+    // TODO decouple from Spotify
+    private String trackUri;            // URL of track on Spotify
 
     private boolean dirty;    // dirty flag
 
@@ -101,6 +98,11 @@ public class Bit implements Serializable
         if((states.get("BitRecording")) == null)
         {
             states.put("BitRecording", new BitRecording());
+        }
+
+        if((states.get("BitPlaying")) == null)
+        {
+            states.put("BitPlaying", new BitRecording());
         }
     }
 
@@ -204,12 +206,21 @@ public class Bit implements Serializable
         this.sendingUser = sendingUser;
     }
 
+    @Exclude
     public String getCoverImageUrl() {
         return coverImageUrl;
     }
 
     public void setCoverImageUrl(String coverImageUrl) {
         this.coverImageUrl = coverImageUrl;
+    }
+
+    public String getTrackUri() {
+        return trackUri;
+    }
+
+    public void setTrackUri(String trackUri) {
+        this.trackUri = trackUri;
     }
 
     /**

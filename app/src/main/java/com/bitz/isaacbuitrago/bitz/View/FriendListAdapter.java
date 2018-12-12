@@ -2,13 +2,8 @@ package com.bitz.isaacbuitrago.bitz.View;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.content.res.ColorStateList;
-import android.os.Build;
-import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.util.SparseBooleanArray;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,15 +15,13 @@ import com.bitz.isaacbuitrago.bitz.R;
 import java.util.ArrayList;
 import java.util.List;
 
-import static android.content.ContentValues.TAG;
-
 /**
  * Adapter and ViewHolder for handling the display of a list of friends.
  *
  * @author isaacbuitrago
  */
 
-public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.FriendsViewHolder>
+public class FriendListAdapter extends RecyclerView.Adapter<FriendListAdapter.FriendsViewHolder>
 {
 
     private Context mContext;
@@ -72,7 +65,7 @@ public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.FriendsVie
     }
 
 
-    public FriendAdapter(Context mContext, List<Friend> friends, ItemClickListener listener)
+    public FriendListAdapter(Context mContext, List<Friend> friends, ItemClickListener listener)
     {
         this.mContext = mContext;
         this.friends = friends;
