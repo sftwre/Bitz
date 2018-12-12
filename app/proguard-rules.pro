@@ -20,8 +20,11 @@
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
 
+# Add this global rule
+-keepattributes Signature
+
 # Keep custom model classes
--keep class com.google.firebase.example.fireeats.model.** { *; }
+-keepclassmembers class com.bitz.isaacbuitrago.bitz.Model.** { *; }
 
 # https://github.com/firebase/FirebaseUI-Android/issues/1175
 -dontwarn okio.**

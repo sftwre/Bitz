@@ -55,5 +55,6 @@
     <string name="auth_failed">Failed to Authenticate</string>
     <string name="auth_success">Authentication Success</string>
     <string name="title_activity_bitz_inbox">BitzInboxActivity</string>
+    <string name="title_activity_replay">ReplayActivity</string>
 
 </resources>

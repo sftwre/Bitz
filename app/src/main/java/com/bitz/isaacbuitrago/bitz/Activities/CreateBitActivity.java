@@ -39,7 +39,7 @@ import java.util.TimerTask;
  *
  * @author isaacbuitrago
  */
-public class MusicPlayer extends AppCompatActivity
+public class CreateBitActivity extends AppCompatActivity
 {
     private SpotifyAppRemote mSpotifyAppRemote;
 
@@ -128,7 +128,7 @@ public class MusicPlayer extends AppCompatActivity
                         playerApi.pause();
 
                         // Start the new Activity
-                        Intent intent = new Intent(MusicPlayer.this, VerifyBit.class);
+                        Intent intent = new Intent(CreateBitActivity.this, VerifyBit.class);
 
                         intent.putExtra("Bit", bit);
 
@@ -236,7 +236,7 @@ public class MusicPlayer extends AppCompatActivity
                     // save the auth token
                     Properties.accessToken = response.getAccessToken();
 
-                    Log.i("MusicPlayer", "Authenticated to Spotify");
+                    Log.i("CreateBitActivity", "Authenticated to Spotify");
 
                     break;
 
@@ -244,7 +244,7 @@ public class MusicPlayer extends AppCompatActivity
                 case ERROR:
                     // Handle error response
 
-                    Log.e("MusicPlayer", "Error authenticating to Spotify");
+                    Log.e("CreateBitActivity", "Error authenticating to Spotify");
 
                     break;
 
@@ -252,7 +252,7 @@ public class MusicPlayer extends AppCompatActivity
                 default:
                     // Handle other cases
 
-                    Log.e("MusicPlayer", "Error authenticating to Spotify");
+                    Log.e("CreateBitActivity", "Error authenticating to Spotify");
 
             }
         }
@@ -332,7 +332,7 @@ public class MusicPlayer extends AppCompatActivity
 
         SpotifyAppRemote.CONNECTOR.disconnect(mSpotifyAppRemote);
 
-        Log.i("MusicPlayer", "Disconnected userName Spotify");
+        Log.i("CreateBitActivity", "Disconnected userName Spotify");
     }
 
     /**

@@ -10,7 +10,7 @@ import com.bitz.isaacbuitrago.bitz.R;
  * Replays the Bit received in the inbox
  * @author isaacbuitrago
  */
-public class ReplayActivity extends AppCompatActivity
+public class ReplayBitActivity extends AppCompatActivity
 {
 
     @Override

@@ -1,6 +1,11 @@
 package com.bitz.isaacbuitrago.bitz.Model;
 
+
 import android.support.annotation.Keep;
+
+import com.google.firebase.database.Exclude;
+import com.google.firebase.database.IgnoreExtraProperties;
+import com.google.firebase.database.annotations.Nullable;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
@@ -24,23 +29,20 @@ public class Bit implements Serializable
 
     private  String platform;           // streaming platform the track is on
 
-    @Keep
-    private transient BitState state;   // Bit state, either recording or stopped
+    private BitState state;             // Bit state, either recording or stopped
 
     private LocalDateTime dateCreated;  // date of creation
 
-    private String bitId;               // unique id of Bit
+    private String bitId;               // unique id of a Bit
 
     private String sendingUser;         // username of sender
 
     private String coverImageUrl;       // URL of album cover for Track
 
-    private boolean dirty;              // dirty flag
-
+    private boolean dirty;    // dirty flag
 
     // set the active Bit states in a Bit
     private static HashMap<String, BitState> states = new HashMap<String, BitState>();
-
 
     /**
      * Creates a new Bit in the default stopped state
@@ -136,6 +138,7 @@ public class Bit implements Serializable
         this.platform = platform;
     }
 
+    @Exclude
     public BitState getState()
     {
         return state;
@@ -166,6 +169,7 @@ public class Bit implements Serializable
         this.endTime = endTime;
     }
 
+    @Exclude
     public boolean isDirty()
     {
         return dirty;
