@@ -28,6 +28,8 @@ import com.bitz.isaacbuitrago.bitz.R;
 import com.bitz.isaacbuitrago.bitz.View.DividerItemDecoration;
 import com.bitz.isaacbuitrago.bitz.View.FriendAdapter;
 import com.bitz.isaacbuitrago.bitz.View.ItemClickListener;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -35,6 +37,9 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -139,7 +144,7 @@ public class SendBitActivity extends AppCompatActivity implements ItemClickListe
     {
         super.onStart();
 
-        // get the Bit from the Intent
+        // get the Bit from the Intent, set to null if no Bit is received
         this.bit = (Bit) getIntent().getSerializableExtra("Bit");
 
         // set up Firebase auth and the auth state listener
@@ -171,6 +176,7 @@ public class SendBitActivity extends AppCompatActivity implements ItemClickListe
      */
     private void getFriends()
     {
+
         sendingUser = FirebaseAuth.getInstance().getCurrentUser();
 
         mFriendsReference
@@ -259,6 +265,17 @@ public class SendBitActivity extends AppCompatActivity implements ItemClickListe
     {
         final String bitzPath;
 
+//        Bit b = new Bit();
+//
+//        b.setTrackTitle("New York groove");
+//        b.setPlatform("Spotify");
+//        b.setArtist("Kiss");
+//        b.setSendingUser(sendingUser.getUid());
+//        b.setStartTime(12345);
+//        b.setEndTime(123456);
+//        b.setCoverImageUrl("www.google.com");
+//        b.setDateCreated(LocalDateTime.now());
+
         // create a new Bit in the database
         String bitId = mFriendsReference.child(getString(R.string.dbname_bitz)).push().getKey();
 
@@ -268,7 +285,6 @@ public class SendBitActivity extends AppCompatActivity implements ItemClickListe
 
         // store Bit in the Database
         mFriendsReference.child(bitzPath).setValue(bit);
-
 
         // update inbox for each recipient so they have the id of Bit sent to them
         Map<String, Object> childUpdates = new HashMap<String, Object>();
@@ -289,7 +305,11 @@ public class SendBitActivity extends AppCompatActivity implements ItemClickListe
         recipientsNavigationView.setVisibility(View.INVISIBLE);
 
         // TODO transition to another activity
+        Intent intent = new Intent(SendBitActivity.this, HomeActivity.class);
 
+        startActivity(intent);
+
+        finish();
     }
 
     /**
@@ -343,6 +363,7 @@ public class SendBitActivity extends AppCompatActivity implements ItemClickListe
      *
      * Handles interaction with Send Button
      */
+
     View.OnClickListener mOnClickListener = (view) -> {sendBit();};
 
 
@@ -418,79 +439,6 @@ public class SendBitActivity extends AppCompatActivity implements ItemClickListe
             recipientsNavigationView.setVisibility(View.INVISIBLE);
         }
 
-    }
-
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu)
-    {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item)
-    {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.actionSearch)
-        {
-            Toast.makeText(getApplicationContext(), "Search...", Toast.LENGTH_SHORT).show();
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
-
-    /**
-     *
-     * Callback for handling ActionMode setup and usage
-     */
-    private class ActionModeCallback implements ActionMode.Callback
-    {
-
-        // startActionMode() was called
-        @Override
-        public boolean onCreateActionMode(ActionMode mode, Menu menu)
-        {
-            mode.getMenuInflater().inflate(R.menu.menu_action_mode, menu);
-
-            // disable swipe refresh if action mode is enabled
-            return true;
-        }
-
-        @Override
-        public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
-            return false;
-        }
-
-        @Override
-        public boolean onActionItemClicked(ActionMode mode, MenuItem item)
-        {
-            switch (item.getItemId())
-            {
-                case R.id.actionSend:
-                    // delete all the selected messages
-                    sendBit();
-                    mode.finish();
-                    return true;
-
-                default:
-                    return false;
-            }
-        }
-
-        @Override
-        public void onDestroyActionMode(ActionMode mode)
-        {
-            mfriendAdapter.clearSelections();
-
-        }
     }
 
 }

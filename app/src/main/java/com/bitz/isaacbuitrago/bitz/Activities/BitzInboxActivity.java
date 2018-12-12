@@ -1,5 +1,6 @@
 package com.bitz.isaacbuitrago.bitz.Activities;
 
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -22,7 +23,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -59,6 +60,8 @@ public class BitzInboxActivity extends AppCompatActivity implements ItemClickLis
         setContentView(R.layout.activity_bitz_inbox);
 
         Toolbar toolbar = findViewById(R.id.toolbar);
+
+        bitz = new ArrayList<Bit>();
 
         mBitzAdapter = new BitzInboxAdapter(this, bitz, this);
 
@@ -117,15 +120,35 @@ public class BitzInboxActivity extends AppCompatActivity implements ItemClickLis
                     @Override
                     public void onDataChange(@NonNull DataSnapshot dataSnapshot)
                     {
-                        // collection of Bitz in Inbox
-                        Map<String, Object> bit = (HashMap<String, Object>) dataSnapshot.getValue();
+                        // Collection of Bit id's
+                        Map<String, String> bitIds = (HashMap<String, String>) dataSnapshot.getValue();
 
-                        for(Map.Entry<String, Object> entry : bit.entrySet())
+                        // Read Bit from it's path
+                        for(String id : bitIds.values())
                         {
-                            Bit b = (Bit) entry.getValue();
+                            mDatabase.child(getString(R.string.dbname_bitz))
+                                    .child(id)
+                                    .addValueEventListener(new ValueEventListener()
+                                    {
+                                        @Override
+                                        public void onDataChange(@NonNull DataSnapshot dataSnapshot)
+                                        {
+                                            Bit b = dataSnapshot.getValue(Bit.class);
 
-                            bitz.add(b);
+                                            bitz.add(b);
+
+                                            mBitzAdapter.notifyDataSetChanged();
+                                        }
+
+                                        @Override
+                                        public void onCancelled(@NonNull DatabaseError databaseError)
+                                        {
+
+                                        }
+                                    });
                         }
+
+
                     }
 
                     @Override
@@ -138,12 +161,23 @@ public class BitzInboxActivity extends AppCompatActivity implements ItemClickLis
 
     /**
      * Handles selection of a Card
+     *
      * @param view
      * @param position
      */
     @Override
     public void onItemRowClicked(View view, int position)
     {
+        // get the selected bit and play it
+        Bit bit = bitz.get(position);
 
+        Intent intent = new Intent(BitzInboxActivity.this, ReplayBitActivity.class);
+
+        // pass the Bit as a parceable
+        intent.putExtra("Bit", bit);
+
+        startActivity(intent);
+
+        finish();
     }
 }
