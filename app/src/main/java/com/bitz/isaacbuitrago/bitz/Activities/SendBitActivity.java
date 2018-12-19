@@ -183,7 +183,6 @@ public class SendBitActivity extends AppCompatActivity implements ItemClickListe
             {
                 // This method is called once with the initial value and again
                 // whenever data at this location is updated.
-
                 friendsList.clear();
 
                 Map<String, Boolean> map = (Map<String, Boolean>) dataSnapshot.getValue();
@@ -258,19 +257,28 @@ public class SendBitActivity extends AppCompatActivity implements ItemClickListe
     {
         final String bitzPath;
 
-//        Bit b = new Bit();
-//
-//        b.setTrackTitle("New York groove");
-//        b.setPlatform("Spotify");
-//        b.setArtist("Kiss");
-//        b.setSendingUser(sendingUser.getUid());
-//        b.setStartTime(12345);
-//        b.setEndTime(123456);
-//        b.setCoverImageUrl("www.google.com");
-//        b.setDateCreated(LocalDateTime.now());
-
         // create a new Bit in the database
         String bitId = mFriendsReference.child(getString(R.string.dbname_bitz)).push().getKey();
+
+
+        mFriendsReference
+                .child(getString(R.string.dbname_users))
+                .child(sendingUser.getUid())
+                .child(getString(R.string.dbname_username))
+                .addListenerForSingleValueEvent(new ValueEventListener()
+                {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot)
+                    {
+                        bit.setSendingUser(dataSnapshot.toString());
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError)
+                    {
+
+                    }
+                });
 
         bit.setBitId(bitId);
 

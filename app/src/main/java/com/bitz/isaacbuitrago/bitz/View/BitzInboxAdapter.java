@@ -62,9 +62,9 @@ public class BitzInboxAdapter extends RecyclerView.Adapter<BitzInboxAdapter.Bitz
     {
         Bit bit = bitz.get(position);
 
-        viewHolder.artistTextView.setText(bit.getArtist());
+        viewHolder.artistTextView.setText(String.format("by %s", bit.getArtist()));
 
-        viewHolder.userNameTextView.setText(bit.getSendingUser());
+        viewHolder.userNameTextView.setText(String.format("from %s", bit.getSendingUser()));
 
         viewHolder.titleTextView.setText(bit.getTrackTitle());
 

@@ -50,6 +50,8 @@
     <string name="dbname_bitzInbox"> bitzInbox</string>
     <string name="dbname_bitz"> bitz</string>
     <string name="title_activity_home">HomeActivity</string>
+    <string name="dbname_username">username</string>
+
 
     <!-- Firebase messages -->
     <string name="auth_failed">Failed to Authenticate</string>

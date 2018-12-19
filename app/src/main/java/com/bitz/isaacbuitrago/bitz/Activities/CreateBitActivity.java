@@ -2,11 +2,13 @@ package com.bitz.isaacbuitrago.bitz.Activities;
 
 import android.content.Context;
 import android.content.Intent;
+import android.icu.util.LocaleData;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.BottomNavigationView;
+import android.support.v4.app.FragmentActivity;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.MenuItem;
@@ -30,8 +32,11 @@ import com.spotify.protocol.types.Track;
 import com.spotify.sdk.android.authentication.AuthenticationClient;
 import com.spotify.sdk.android.authentication.AuthenticationRequest;
 import com.spotify.sdk.android.authentication.AuthenticationResponse;
+
+import java.time.LocalDateTime;
 import java.util.Timer;
 import java.util.TimerTask;
+import static android.support.constraint.Constraints.TAG;
 
 /**
  * Responsible for rendering the image and data of the currently playing
@@ -103,7 +108,6 @@ public class CreateBitActivity extends AppCompatActivity
                 case R.id.navigation_bit:
 
                     // change the state of the Bit each time the Disk is tapped
-
                     bit.transitionState();
 
                     Context context = getApplicationContext();
@@ -119,10 +123,15 @@ public class CreateBitActivity extends AppCompatActivity
                     if(bit.getState() instanceof BitRecording)
                     {
                         bit.setTime(stopwatch.getTime());
+
+                        bit.setDateCreated(LocalDateTime.now());
                     }
                     else if(bit.getState() instanceof BitStopped)
                     {
                         bit.setTime(stopwatch.getTime());
+
+                        // go to start time
+                        playerApi.seekTo(bit.getStartTime());
 
                         // pause the player
                         playerApi.pause();
@@ -156,9 +165,9 @@ public class CreateBitActivity extends AppCompatActivity
                     // seek the current track to the position
                     if(fromUser && playerApi != null)
                     {
-                        playerApi.seekTo((long) progress);
-
                         stopwatch.setTime((long) progress);
+
+                        playerApi.seekTo((long) progress);
                     }
                 }
 
@@ -341,6 +350,8 @@ public class CreateBitActivity extends AppCompatActivity
     private void spotifyConnected()
     {
         // play the track
+
+        // TODO create bit on current track
         playerApi.play("spotify:user:spotify:playlist:37i9dQZF1DX2sUQwD7tbmL");
 
         // start the stopwatch
@@ -360,7 +371,7 @@ public class CreateBitActivity extends AppCompatActivity
 
                     bit.setTrackTitle(track.name);
 
-                    bit.setArtist(track.artist.toString());
+                    bit.setArtist(track.artist.name);
 
                     bit.setPlatform("spotify");
 
@@ -406,7 +417,7 @@ public class CreateBitActivity extends AppCompatActivity
      */
     private void changeSeekBar()
     {
-        // If the stopwatch is has not exceeded track duration, set progress.
+        // If the stopwatch has not exceeded track duration, set progress.
         if(Build.VERSION.SDK_INT >= 21 &&
                 stopwatch.getTime() <= track.duration)
         {
