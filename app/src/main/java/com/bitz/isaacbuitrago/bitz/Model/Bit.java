@@ -99,11 +99,6 @@ public class Bit implements Serializable
         {
             states.put("BitRecording", new BitRecording());
         }
-
-        if((states.get("BitPlaying")) == null)
-        {
-            states.put("BitPlaying", new BitRecording());
-        }
     }
 
     /*
@@ -182,7 +177,8 @@ public class Bit implements Serializable
         this.dirty = dirty;
     }
 
-    public LocalDateTime getDateCreated() {
+    public LocalDateTime getDateCreated()
+    {
         return dateCreated;
     }
 
