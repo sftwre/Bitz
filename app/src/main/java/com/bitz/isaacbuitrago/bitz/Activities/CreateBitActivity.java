@@ -2,13 +2,11 @@ package com.bitz.isaacbuitrago.bitz.Activities;
 
 import android.content.Context;
 import android.content.Intent;
-import android.icu.util.LocaleData;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.BottomNavigationView;
-import android.support.v4.app.FragmentActivity;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.MenuItem;
@@ -124,7 +122,7 @@ public class CreateBitActivity extends AppCompatActivity
                     {
                         bit.setTime(stopwatch.getTime());
 
-                        bit.setDateCreated(LocalDateTime.now());
+                        //bit.setDateCreated(LocalDateTime.now());
                     }
                     else if(bit.getState() instanceof BitStopped)
                     {

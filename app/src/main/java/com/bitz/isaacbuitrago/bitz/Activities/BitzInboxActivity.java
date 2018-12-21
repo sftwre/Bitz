@@ -106,7 +106,7 @@ public class BitzInboxActivity extends AppCompatActivity implements ItemClickLis
     }
 
     /**
-     * Fetch  Bitz sent to the current user
+     * Fetch Bitz sent to the current user
      */
     private void getBitz()
     {

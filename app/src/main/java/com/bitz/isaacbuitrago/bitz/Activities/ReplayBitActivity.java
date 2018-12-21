@@ -11,9 +11,7 @@ import android.widget.ImageButton;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import com.bitz.isaacbuitrago.bitz.Model.Bit;
-import com.bitz.isaacbuitrago.bitz.Model.BitPlaying;
 import com.bitz.isaacbuitrago.bitz.Model.BitRecording;
-import com.bitz.isaacbuitrago.bitz.Model.BitState;
 import com.bitz.isaacbuitrago.bitz.Model.BitStopped;
 import com.bitz.isaacbuitrago.bitz.Model.StopwatchAdapter;
 import com.bitz.isaacbuitrago.bitz.R;
@@ -70,59 +68,63 @@ public class ReplayBitActivity extends AppCompatActivity
      * Plays the Bit and schedules Task to
      * stop the player after the Bit is done.
      */
-    View.OnClickListener mOnClickListener = (i) ->
+    View.OnClickListener mOnClickListener = new View.OnClickListener()
+
     {
-
-        // PlayerApi not connected
-        if(playerApi == null)
+        @Override
+        public void onClick(View v)
         {
-            return;
-        }
-
-        if(bit.getState() instanceof BitStopped)
-        {
-
-            bit.transitionState();
-
-            // calculate wait time
-            long startTime = bit.getStartTime();
-
-            long endTime = bit.getEndTime();
-
-            long waitTime = endTime - startTime;
-
-            // seek to the Bit start time and play the Bit
-            playerApi.play(bit.getTrackUri());
-
-            playerApi.seekTo(startTime);
-
-            // schedule task to update the SeekBar
-            scheduler.schedule(() ->
+            // PlayerApi not connected
+            if(ReplayBitActivity.this.playerApi == null)
             {
-                changeSeekBar();
-            }, DELAY_TIME, TimeUnit.MILLISECONDS);
-
-            // create task to wait duration of Bit
-            if (Build.VERSION.SDK_INT >= 26)
-            {
-                Instant start = Instant.now();
-
-                // schedule task to stop player after wait time
-                ScheduledFuture<?> handler = scheduler.schedule(() -> {
-                    playerApi.pause();
-                }, waitTime, TimeUnit.MILLISECONDS);
-
-                scheduler.schedule(() -> handler.cancel(false), waitTime, TimeUnit.MILLISECONDS);
+                return;
             }
 
+            if(bit.getState() instanceof BitStopped)
+            {
+
+                bit.transitionState();
+
+                // calculate wait time
+                long startTime = bit.getStartTime();
+
+                long endTime = bit.getEndTime();
+
+                long waitTime = endTime - startTime;
+
+                // seek to the Bit start time and play the Bit
+
+                // TODO make sure the uri is set on the bit
+                playerApi.play("spotify:user:spotify:playlist:37i9dQZF1DX2sUQwD7tbmL");
+
+                playerApi.seekTo(startTime);
+
+                // schedule task to update the SeekBar
+                scheduler.schedule(() ->
+                {
+                    changeSeekBar();
+                }, DELAY_TIME, TimeUnit.MILLISECONDS);
+
+                // create task to wait duration of Bit
+                if (Build.VERSION.SDK_INT >= 26)
+                {
+                    Instant start = Instant.now();
+
+                    // schedule task to stop player after wait time
+                    ScheduledFuture<?> handler = scheduler.schedule(() -> {
+                        playerApi.pause();
+                    }, waitTime, TimeUnit.MILLISECONDS);
+
+                    scheduler.schedule(() -> handler.cancel(false), waitTime, TimeUnit.MILLISECONDS);
+                }
+            }
+
+            else if(bit.getState() instanceof BitRecording)
+            {
+                bit.transitionState();
+
+            }
         }
-
-        else if(bit.getState() instanceof BitRecording)
-        {
-            bit.transitionState();
-
-        }
-
     };
 
     /**
@@ -155,8 +157,6 @@ public class ReplayBitActivity extends AppCompatActivity
 
         // retrieve the Bit
         bit = (Bit) getIntent().getSerializableExtra("Bit");
-
-        bit.setState(new BitPlaying());
     }
 
 

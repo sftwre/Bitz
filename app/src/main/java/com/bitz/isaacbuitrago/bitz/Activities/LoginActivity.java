@@ -181,7 +181,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 // Response was successful and contains auth token
                 case TOKEN:
 
-                    String message = String.format("Recieved token : %s", response.getCode());
+                    String message = String.format("Received token : %s", response.getCode());
 
                     Properties.accessToken = response.getAccessToken();
 
@@ -196,7 +196,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
                 // Most likely auth flow was cancelled
                 default:
-                    Log.d("LoginActivity", response.getState());
+                    Log.d("LoginActivity", "Could not authenticate user");
             }
         }
     }
@@ -219,12 +219,15 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         if (checkSelfPermission(READ_CONTACTS) == PackageManager.PERMISSION_GRANTED) {
             return true;
         }
-        if (shouldShowRequestPermissionRationale(READ_CONTACTS)) {
+        if (shouldShowRequestPermissionRationale(READ_CONTACTS))
+        {
             Snackbar.make(mEmailView, R.string.permission_rationale, Snackbar.LENGTH_INDEFINITE)
-                    .setAction(android.R.string.ok, new View.OnClickListener() {
+                    .setAction(android.R.string.ok, new View.OnClickListener()
+                    {
                         @Override
                         @TargetApi(Build.VERSION_CODES.M)
-                        public void onClick(View v) {
+                        public void onClick(View v)
+                        {
                             requestPermissions(new String[]{READ_CONTACTS}, REQUEST_READ_CONTACTS);
                         }
                     });
@@ -324,7 +327,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                             else{
                                 Log.d(TAG, "onComplete: success. email is verified.");
 
-                                Intent intent = new Intent(LoginActivity.this, BitzInboxActivity.class);
+                                Intent intent = new Intent(LoginActivity.this, CreateBitActivity.class);
 
                                 startActivity(intent);
 
