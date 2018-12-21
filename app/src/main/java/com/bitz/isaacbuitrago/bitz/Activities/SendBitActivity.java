@@ -249,7 +249,9 @@ public class SendBitActivity extends AppCompatActivity implements ItemClickListe
     }
 
     /**
-     * Stores the Bit in the Database, sends it to each listed recipient,
+     *
+     * Stores the Bit in the Database,
+     * sends it to each listed recipient,
      * and closes the BottomNavigationView.
      *
      */
@@ -260,7 +262,11 @@ public class SendBitActivity extends AppCompatActivity implements ItemClickListe
         // create a new Bit in the database
         String bitId = mFriendsReference.child(getString(R.string.dbname_bitz)).push().getKey();
 
+        String name = sendingUser.getDisplayName();
 
+        bitzPath = String.format("/%s/%s", getString(R.string.dbname_bitz), bitId);
+
+        // set the user name of the sender
         mFriendsReference
                 .child(getString(R.string.dbname_users))
                 .child(sendingUser.getUid())
@@ -270,7 +276,10 @@ public class SendBitActivity extends AppCompatActivity implements ItemClickListe
                     @Override
                     public void onDataChange(@NonNull DataSnapshot dataSnapshot)
                     {
-                        bit.setSendingUser(dataSnapshot.toString());
+                        // store Bit in the Database
+                        bit.setSendingUserName((String) dataSnapshot.getValue());
+                        bit.setBitId(bitId);
+                        mFriendsReference.child(bitzPath).setValue(bit);
                     }
 
                     @Override
@@ -279,13 +288,6 @@ public class SendBitActivity extends AppCompatActivity implements ItemClickListe
 
                     }
                 });
-
-        bit.setBitId(bitId);
-
-        bitzPath = String.format("/%s/%s", getString(R.string.dbname_bitz), bitId);
-
-        // store Bit in the Database
-        mFriendsReference.child(bitzPath).setValue(bit);
 
         // update inbox for each recipient so they have the id of Bit sent to them
         Map<String, Object> childUpdates = new HashMap<String, Object>();
@@ -302,10 +304,9 @@ public class SendBitActivity extends AppCompatActivity implements ItemClickListe
 
         mFriendsReference.updateChildren(childUpdates);
 
-        // hide the bottom navigation view
+        // hide the bottom navigation view and transition to the HomeActivity
         recipientsNavigationView.setVisibility(View.INVISIBLE);
 
-        // TODO transition to another activity
         Intent intent = new Intent(SendBitActivity.this, HomeActivity.class);
 
         startActivity(intent);

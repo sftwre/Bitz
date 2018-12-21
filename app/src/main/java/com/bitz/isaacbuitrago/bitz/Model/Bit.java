@@ -29,7 +29,7 @@ public class Bit implements Serializable
 
     private String bitId;               // unique id of a Bit
 
-    private String sendingUser;         // username of sender
+    private String sendingUserName;     // username of sender
 
     private String coverImageUrl;       // URL of album cover for Track
 
@@ -194,12 +194,12 @@ public class Bit implements Serializable
         this.bitId = bitId;
     }
 
-    public String getSendingUser() {
-        return sendingUser;
+    public String getSendingUserName() {
+        return sendingUserName;
     }
 
-    public void setSendingUser(String sendingUser) {
-        this.sendingUser = sendingUser;
+    public void setSendingUserName(String sendingUserName) {
+        this.sendingUserName = sendingUserName;
     }
 
     @Exclude

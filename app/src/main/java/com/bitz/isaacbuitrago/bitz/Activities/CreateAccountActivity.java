@@ -18,7 +18,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
-import com.bitz.isaacbuitrago.bitz.Database.UserData;
 import com.bitz.isaacbuitrago.bitz.Model.User;
 import com.bitz.isaacbuitrago.bitz.R;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -160,9 +159,6 @@ public class CreateAccountActivity extends AppCompatActivity
 
                     .addOnCompleteListener(CreateAccountActivity.this, new OnCompleteListener<AuthResult>()
                     {
-
-                        UserData mUserData = new UserData();
-
                         @Override
                         public void onComplete(@NonNull Task<AuthResult> task)
                         {
@@ -174,7 +170,7 @@ public class CreateAccountActivity extends AppCompatActivity
                                 // Store account information in the database
                                 newUser.setId(currentUser.getUid());
 
-                                mUserData.write(newUser);
+                                //TODO write the data in the User node
 
                                 // Sign in success, update UI with the signed-in user's information
                                 Log.d(TAG, "createUserWithEmail:success");
