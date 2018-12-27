@@ -88,11 +88,11 @@
                     android:textSize="16dp" />
 
                 <TextView
-                    android:id="@+id/registerLink"
+                    android:id="@+id/joinNowLink"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:gravity="center_vertical|center_horizontal|center"
-                    android:text="@string/action_create_account"
+                    android:text="@string/action_join"
                     android:textColor="@android:color/black"
                     android:textSize="16dp" />
 

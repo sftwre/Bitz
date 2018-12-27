@@ -62,7 +62,8 @@ public class SignInActivity extends AppCompatActivity implements LoaderCallbacks
     // UI references.
     private AutoCompleteTextView mEmailView;
     private EditText mPasswordView;
-    private TextView registerLink;
+    private TextView joinNowLink;
+    private TextView forgotPassLink;
     private View mProgressView;
     private View mLoginFormView;
 
@@ -76,7 +77,7 @@ public class SignInActivity extends AppCompatActivity implements LoaderCallbacks
     {
         super.onCreate(savedInstanceState);
 
-        setContentView(R.layout.activity_login);
+        setContentView(R.layout.activity_sign_in);
 
         // Set up the login form.
         mEmailView = (AutoCompleteTextView) findViewById(R.id.loginEmail);
@@ -103,16 +104,24 @@ public class SignInActivity extends AppCompatActivity implements LoaderCallbacks
 
         mEmailSignInButton.setOnClickListener((l) -> attemptLogin());
 
-        registerLink = findViewById(R.id.registerLink);
+        joinNowLink = findViewById(R.id.joinNowLink);
 
-        registerLink.setOnClickListener((l) -> {
-
+        // set on click listener
+        joinNowLink.setOnClickListener((l) ->
+        {
             Intent intent = new Intent(SignInActivity.this, CreateAccountActivity.class);
 
             startActivity(intent);
 
             finish();
+        });
 
+        forgotPassLink = findViewById(R.id.forgotPasswordLink);
+
+        // set on click listener
+        forgotPassLink.setOnClickListener((l) ->
+        {
+            // TODO create activity for resetting password
         });
 
         mLoginFormView = findViewById(R.id.login_form);
