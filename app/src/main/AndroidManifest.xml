@@ -20,10 +20,13 @@
             android:theme="@android:style/Theme.Translucent.NoTitleBar" />
         <activity
             android:name=".Activities.CreateBitActivity"
-            android:label="@string/app_name" />
+            android:label="@string/app_name">
+        </activity>
+
         <activity
-            android:name=".Activities.LoginActivity"
+            android:name=".Activities.SignInActivity"
             android:label="@string/title_activity_login">
+
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -53,7 +56,8 @@
         <activity
             android:name=".Activities.BitzInboxActivity"
             android:label="@string/title_activity_bitz_inbox"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:theme="@style/AppTheme.NoActionBar">
+        </activity>
         <activity
             android:name=".Activities.ReplayBitActivity"
             android:label="@string/title_activity_replay"

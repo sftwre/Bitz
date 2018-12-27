@@ -30,11 +30,8 @@ import com.spotify.protocol.types.Track;
 import com.spotify.sdk.android.authentication.AuthenticationClient;
 import com.spotify.sdk.android.authentication.AuthenticationRequest;
 import com.spotify.sdk.android.authentication.AuthenticationResponse;
-
-import java.time.LocalDateTime;
 import java.util.Timer;
 import java.util.TimerTask;
-import static android.support.constraint.Constraints.TAG;
 
 /**
  * Responsible for rendering the image and data of the currently playing
@@ -121,8 +118,6 @@ public class CreateBitActivity extends AppCompatActivity
                     if(bit.getState() instanceof BitRecording)
                     {
                         bit.setTime(stopwatch.getTime());
-
-                        //bit.setDateCreated(LocalDateTime.now());
                     }
                     else if(bit.getState() instanceof BitStopped)
                     {
@@ -327,7 +322,7 @@ public class CreateBitActivity extends AppCompatActivity
 
 
 
-        Log.i("LoginActivity", "Connected to spotify");
+        Log.i("SignInActivity", "Connected to spotify");
 
     }
 

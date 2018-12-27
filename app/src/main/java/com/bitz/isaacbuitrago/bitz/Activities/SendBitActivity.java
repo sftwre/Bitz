@@ -353,7 +353,7 @@ public class SendBitActivity extends AppCompatActivity implements ItemClickListe
         {
             Log.d(TAG, "checkCurrentUser: Opening Login Activity");
 
-            Intent intent = new Intent(SendBitActivity.this, LoginActivity.class);
+            Intent intent = new Intent(SendBitActivity.this, SignInActivity.class);
 
             startActivity(intent);
 

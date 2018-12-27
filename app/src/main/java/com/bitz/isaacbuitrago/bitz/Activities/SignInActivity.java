@@ -47,7 +47,7 @@ import static android.content.ContentValues.TAG;
  *
  * @author isaacbuitrago
  */
-public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<Cursor>
+public class SignInActivity extends AppCompatActivity implements LoaderCallbacks<Cursor>
 {
 
     /**
@@ -107,7 +107,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
         registerLink.setOnClickListener((l) -> {
 
-            Intent intent = new Intent(LoginActivity.this, CreateAccountActivity.class);
+            Intent intent = new Intent(SignInActivity.this, CreateAccountActivity.class);
 
             startActivity(intent);
 
@@ -185,18 +185,18 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
                     Properties.accessToken = response.getAccessToken();
 
-                    Log.i("LoginActivity", message);
+                    Log.i("SignInActivity", message);
                     break;
 
                 // Auth flow returned an error
                 case ERROR:
-                    Log.e("LoginActivity", response.getError());
+                    Log.e("SignInActivity", response.getError());
 
                     break;
 
                 // Most likely auth flow was cancelled
                 default:
-                    Log.d("LoginActivity", "Could not authenticate user");
+                    Log.d("SignInActivity", "Could not authenticate user");
             }
         }
     }
@@ -302,7 +302,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             showProgress(true);
 
             mAuth.signInWithEmailAndPassword(email, password)
-                    .addOnCompleteListener(LoginActivity.this, new OnCompleteListener<AuthResult>()
+                    .addOnCompleteListener(SignInActivity.this, new OnCompleteListener<AuthResult>()
                     {
                         @Override
                         public void onComplete(@NonNull Task<AuthResult> task)
@@ -318,7 +318,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                             {
                                 Log.w(TAG, "signInWithEmail:failed", task.getException());
 
-                                Toast.makeText(LoginActivity.this, getString(R.string.auth_failed),
+                                Toast.makeText(SignInActivity.this, getString(R.string.auth_failed),
                                         Toast.LENGTH_SHORT).show();
 
                                 mProgressView.setVisibility(View.GONE);
@@ -327,7 +327,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                             else{
                                 Log.d(TAG, "onComplete: success. email is verified.");
 
-                                Intent intent = new Intent(LoginActivity.this, CreateBitActivity.class);
+                                Intent intent = new Intent(SignInActivity.this, CreateBitActivity.class);
 
                                 startActivity(intent);
 
@@ -422,7 +422,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     {
         //Create adapter to tell the AutoCompleteTextView what to show in its dropdown list.
         ArrayAdapter<String> adapter =
-                new ArrayAdapter<>(LoginActivity.this,
+                new ArrayAdapter<>(SignInActivity.this,
                         android.R.layout.simple_dropdown_item_1line, emailAddressCollection);
 
         mEmailView.setAdapter(adapter);
