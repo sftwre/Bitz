@@ -3,16 +3,14 @@ package com.bitz.isaacbuitrago.bitz.Activities;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
+import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.View;
-import android.view.View.OnClickListener;
-import android.view.inputmethod.EditorInfo;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
@@ -21,10 +19,17 @@ import android.widget.Toast;
 import com.bitz.isaacbuitrago.bitz.Model.User;
 import com.bitz.isaacbuitrago.bitz.R;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.RuntimeExecutionException;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.SignInMethodQueryResult;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import static android.support.constraint.Constraints.TAG;
 
 /**
@@ -49,7 +54,13 @@ public class CreateAccountActivity extends AppCompatActivity
 
     private View mLoginFormView;
 
-    private FirebaseAuth mAuth;     // firebase reference
+    private TextView mSignInLink;
+
+    private Button mCreateAccountButton;
+
+    private FirebaseAuth mAuth;         // firebase reference
+
+    private FirebaseDatabase mDatabase; // firebase database reference
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -58,45 +69,130 @@ public class CreateAccountActivity extends AppCompatActivity
 
         setContentView(R.layout.activity_create_account);
 
-        // Set up the login form.
+        // bind UI references to layout controls
         mEmailView = (AutoCompleteTextView) findViewById(R.id.email);
         mPasswordView = (EditText) findViewById(R.id.password);
         mFirstNameView = (EditText) findViewById(R.id.firstName);
         mLastNameView = (EditText) findViewById(R.id.lastName);
         mUsernameView = (EditText) findViewById(R.id.username);
+        mSignInLink = (TextView) findViewById(R.id.signInLink);
+        mCreateAccountButton = (Button) findViewById(R.id.create_accont_button);
+
+        // default to disabled
+        mCreateAccountButton.setEnabled(false);
+
+        mLoginFormView = findViewById(R.id.login_form);
+        mProgressView = findViewById(R.id.login_progress);
 
         // Initialize Firebase Auth
         mAuth = FirebaseAuth.getInstance();
 
-        // todo verify that the user name is not already taken
-
-        mPasswordView.setOnEditorActionListener(new TextView.OnEditorActionListener()
-        {
-            @Override
-            public boolean onEditorAction(TextView textView, int id, KeyEvent keyEvent)
-            {
-                if (id == EditorInfo.IME_ACTION_DONE || id == EditorInfo.IME_NULL)
-                {
-                    createAccount();
-                    return true;
-                }
-                return false;
-            }
-        });
-
-        Button mCreateAccountButton = (Button) findViewById(R.id.create_accont_button);
-
-        mCreateAccountButton.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                createAccount();
-            }
-        });
-
-        mLoginFormView = findViewById(R.id.login_form);
-        mProgressView = findViewById(R.id.login_progress);
+        mDatabase = FirebaseDatabase.getInstance();
     }
 
+    /**
+     *
+     */
+    @Override
+    protected void onStart()
+    {
+        super.onStart();
+
+        // Defines listeners for UI controls
+        mSignInLink.setOnClickListener((l) ->
+        {
+            Intent intent = new Intent(CreateAccountActivity.this, SignInActivity.class);
+
+            startActivity(intent);
+
+            finish();
+        });
+
+        mCreateAccountButton.setOnClickListener((l) ->
+        {
+            createAccount();
+        });
+
+        mUsernameView.setOnFocusChangeListener(new View.OnFocusChangeListener()
+        {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus)
+            {
+
+                String username = ((EditText) v).getText().toString();
+
+                if(! hasFocus && ! username.isEmpty())
+                {
+
+                        // verify that the username does not already exists
+                        mDatabase.getReference(getString(R.string.dbname_usernames))
+                                .child(username)
+                                .addListenerForSingleValueEvent(new ValueEventListener()
+                                {
+                                    @Override
+                                    public void onDataChange(@NonNull DataSnapshot dataSnapshot)
+                                    {
+                                        if (dataSnapshot.getValue() != null)
+                                        {
+                                            // username is already in use
+                                            mUsernameView.setError(getString(R.string.error_user_name_taken));
+                                            mUsernameView.requestFocus();
+                                        }
+                                    }
+
+                                    @Override
+                                    public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                                    }
+
+                                });
+                }
+            }
+        });
+
+        // check if the user name already exists
+        mEmailView.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus)
+            {
+                String email = ((EditText) v).getText().toString();
+
+                if(! hasFocus && ! email.isEmpty())
+                {
+                    try
+                    {
+                        // verify that the email does not already exists
+                        FirebaseAuth
+                                .getInstance()
+                                .fetchSignInMethodsForEmail(((AutoCompleteTextView) v).getText().toString().trim())
+                                .addOnCompleteListener(new OnCompleteListener<SignInMethodQueryResult>()
+                                {
+                                    @Override
+                                    public void onComplete(@NonNull Task<SignInMethodQueryResult> task)
+                                    {
+                                        if(task.isSuccessful())
+                                        {
+                                            boolean check = !task.getResult().getSignInMethods().isEmpty();
+
+                                            // email is in use
+                                            if (check)
+                                            {
+                                                mEmailView.setError(getString(R.string.error_email_taken));
+                                                mEmailView.requestFocus();
+                                            }
+                                        }
+                                    }
+                                });
+                    } catch (Exception e)
+                    {
+                        // invalid email
+                    }
+                }
+
+            }
+        });
+
+    }
 
     /**
      * Attempts to sign in or register the account specified by the login form.
@@ -111,38 +207,37 @@ public class CreateAccountActivity extends AppCompatActivity
         mPasswordView.setError(null);
 
         // Store values at the time of the login attempt.
+        User newUser = new User(mFirstNameView.getText().toString().trim(),
+                                mLastNameView.getText().toString().trim(),
+                                mUsernameView.getText().toString().trim());
 
-        User newUser = new User(mFirstNameView.getText().toString(),
-                                mLastNameView.getText().toString(),
-                                mUsernameView.getText().toString());
-
-        String email = mEmailView.getText().toString();
-        String password = mPasswordView.getText().toString();
+        String email = mEmailView.getText().toString().trim();
+        String password = mPasswordView.getText().toString().trim();
 
         boolean cancel = false;
         View focusView = null;
 
-        // Check for a valid password, if the user entered one.
-        if (!TextUtils.isEmpty(password) && !isPasswordValid(password)) {
+        // validate input
+
+        // Check for a valid password
+        if (TextUtils.isEmpty(password) || !isPasswordValid(password))
+        {
             mPasswordView.setError(getString(R.string.error_invalid_password));
             focusView = mPasswordView;
             cancel = true;
         }
 
         // Check for a valid email address.
-        if (TextUtils.isEmpty(email)) {
+        if (TextUtils.isEmpty(email) || !isEmailValid(email))
+        {
             mEmailView.setError(getString(R.string.error_field_required));
-            focusView = mEmailView;
-            cancel = true;
-        } else if (!isEmailValid(email)) {
-            mEmailView.setError(getString(R.string.error_invalid_email));
             focusView = mEmailView;
             cancel = true;
         }
 
         if (cancel)
         {
-            // There was an error; don't attempt login and focus the first
+            // There was an error; don't attempt account creation and focus the first
             // form field with an error.
             focusView.requestFocus();
         }
@@ -164,7 +259,7 @@ public class CreateAccountActivity extends AppCompatActivity
                         {
                             if (task.isSuccessful())
                             {
-
+                                // user successfully created and authenticated
                                 FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
 
                                 // Store account information in the database
@@ -200,6 +295,7 @@ public class CreateAccountActivity extends AppCompatActivity
         //TODO: Replace this with your own logic
         return password.length() > 4;
     }
+
 
     /**
      * Shows the progress UI and hides the login form.
