@@ -9,9 +9,7 @@
     <!-- Strings related to login -->
     <string name="action_sign_in">Sign in or register</string>
     <string name="action_sign_in_short">Sign in</string>
-    <string name="action_account_exists">Already have an account ? Log In</string>
-    <string name="error_invalid_email">This email address is invalid</string>
-    <string name="error_invalid_password">This password is too short</string>
+    <string name="action_account_exists">Already have an account ? Sign In</string>
     <string name="error_incorrect_password">This password is incorrect</string>
     <string name="error_field_required">This field is required</string>
     <string name="permission_rationale">"Contacts permissions are needed for providing email
@@ -21,17 +19,22 @@
     <string name="search_hint">Search for a song or artist</string>
 
     <!-- Strings related to account creation-->
-    <string name="prompt_first_name">First Name</string>
+    <string name="prompt_first_name"> First Name</string>
     <string name="prompt_last_name">Last Name</string>
     <string name="prompt_user_name">Username</string>
     <string name="prompt_email">Email</string>
-    <string name="prompt_pass">Password</string>
+    <string name="prompt_pass">Password (Minimum of 8 characters)</string>
     <string name="prompt_privacy_policy">You agree to Bitz User Agreement &amp; Privacy Policy</string>
     <string name="action_create_account">Agree &amp; Join</string>
     <string name="action_join">Join Now</string>
     <string name="error_user_name_taken">Username taken</string>
     <string name="error_email_taken">Email taken, please Sign In</string>
-
+    <string name="error_invalid_first_name">Invalid first name</string>
+    <string name="error_invalid_last_name">Invalid last name</string>
+    <string name="error_invalid_email">Invalid email address</string>
+    <string name="error_invalid_password">Invalid password length</string>
+    <string name="error_invalid_username">Invalid username </string>
+    <string name="error_account_creation">Error in creating account, please try again</string>
 
 
     <!-- Strings related to account management-->

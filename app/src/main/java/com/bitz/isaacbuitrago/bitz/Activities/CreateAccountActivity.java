@@ -3,12 +3,13 @@ package com.bitz.isaacbuitrago.bitz.Activities;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.support.annotation.NonNull;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Build;
 import android.os.Bundle;
-import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.AutoCompleteTextView;
@@ -19,17 +20,19 @@ import android.widget.Toast;
 import com.bitz.isaacbuitrago.bitz.Model.User;
 import com.bitz.isaacbuitrago.bitz.R;
 import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.RuntimeExecutionException;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.SignInMethodQueryResult;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import java.util.HashMap;
+import java.util.regex.Pattern;
 import static android.support.constraint.Constraints.TAG;
 
 /**
@@ -40,6 +43,7 @@ import static android.support.constraint.Constraints.TAG;
 public class CreateAccountActivity extends AppCompatActivity
 {
     // UI references.
+
     private AutoCompleteTextView mEmailView;
 
     private EditText mFirstNameView;
@@ -52,7 +56,7 @@ public class CreateAccountActivity extends AppCompatActivity
 
     private View mProgressView;
 
-    private View mLoginFormView;
+    private View mCreateAccountFormView;
 
     private TextView mSignInLink;
 
@@ -61,6 +65,10 @@ public class CreateAccountActivity extends AppCompatActivity
     private FirebaseAuth mAuth;         // firebase reference
 
     private FirebaseDatabase mDatabase; // firebase database reference
+
+    // constants
+    private static final int MIN_PASS_LEN = 8;
+    private static final int DELAY_TIME = 5000;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -78,11 +86,8 @@ public class CreateAccountActivity extends AppCompatActivity
         mSignInLink = (TextView) findViewById(R.id.signInLink);
         mCreateAccountButton = (Button) findViewById(R.id.create_accont_button);
 
-        // default to disabled
-        mCreateAccountButton.setEnabled(false);
-
-        mLoginFormView = findViewById(R.id.login_form);
-        mProgressView = findViewById(R.id.login_progress);
+        mCreateAccountFormView = findViewById(R.id.userInfoForm);
+        mProgressView = findViewById(R.id.createAccountProgress);
 
         // Initialize Firebase Auth
         mAuth = FirebaseAuth.getInstance();
@@ -199,39 +204,54 @@ public class CreateAccountActivity extends AppCompatActivity
      * If there are form errors (invalid email, missing fields, etc.), the
      * errors are presented and no actual login attempt is made.
      */
-    private void createAccount()
-    {
+    private void createAccount() {
 
         // Reset errors.
         mEmailView.setError(null);
         mPasswordView.setError(null);
 
-        // Store values at the time of the login attempt.
-        User newUser = new User(mFirstNameView.getText().toString().trim(),
-                                mLastNameView.getText().toString().trim(),
-                                mUsernameView.getText().toString().trim());
-
+        String firstName = mFirstNameView.getText().toString().trim();
+        String lastName = mLastNameView.getText().toString().trim();
+        String userName = mUsernameView.getText().toString().trim();
         String email = mEmailView.getText().toString().trim();
         String password = mPasswordView.getText().toString().trim();
 
         boolean cancel = false;
         View focusView = null;
 
-        // validate input
-
-        // Check for a valid password
-        if (TextUtils.isEmpty(password) || !isPasswordValid(password))
-        {
+        // validate password
+        if (password.isEmpty() || !isPasswordValid(password)) {
             mPasswordView.setError(getString(R.string.error_invalid_password));
             focusView = mPasswordView;
             cancel = true;
         }
 
-        // Check for a valid email address.
-        if (TextUtils.isEmpty(email) || !isEmailValid(email))
-        {
-            mEmailView.setError(getString(R.string.error_field_required));
+        // validate email
+        if (email.isEmpty() || !isEmailValid(email)) {
+            mEmailView.setError(getString(R.string.error_invalid_email));
             focusView = mEmailView;
+            cancel = true;
+        }
+
+        // validate first name
+        if (firstName.isEmpty() || !isNameValid(firstName)) {
+            mFirstNameView.setError(getString(R.string.error_invalid_first_name));
+            focusView = mFirstNameView;
+            cancel = true;
+        }
+
+        // validate last name
+        if (lastName.isEmpty() || !isNameValid(lastName)) {
+            mLastNameView.setError(getString(R.string.error_invalid_last_name));
+            focusView = mLastNameView;
+            cancel = true;
+        }
+
+        // validate username
+        if (userName.isEmpty())
+        {
+            mUsernameView.setError(getString(R.string.error_invalid_username));
+            focusView = mUsernameView;
             cancel = true;
         }
 
@@ -243,14 +263,18 @@ public class CreateAccountActivity extends AppCompatActivity
         }
         else {
 
-            newUser.setEmail(email);
-            newUser.setPassword(password);
+            User user = new User();
+
+            user.setEmail(email);
+            user.setFirstName(firstName);
+            user.setLastName(lastName);
+            user.setUsername(userName);
 
             // Show a progress spinner, and kick off a background task to
             // perform the user login attempt.
             showProgress(true);
 
-            mAuth.createUserWithEmailAndPassword(newUser.getEmail(), newUser.getPassword())
+            mAuth.createUserWithEmailAndPassword(email, password)
 
                     .addOnCompleteListener(CreateAccountActivity.this, new OnCompleteListener<AuthResult>()
                     {
@@ -259,15 +283,81 @@ public class CreateAccountActivity extends AppCompatActivity
                         {
                             if (task.isSuccessful())
                             {
+
+                                HashMap<String, Object> childUpdates = new HashMap<>();
+
                                 // user successfully created and authenticated
                                 FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
 
-                                // Store account information in the database
-                                newUser.setId(currentUser.getUid());
+                                // write user name and user data in the database
+                                user.setId(currentUser.getUid());
 
-                                //TODO write the data in the User node
+                                final String users = String.format("%s/%s", getString(R.string.dbname_users), user.getId());
 
-                                // Sign in success, update UI with the signed-in user's information
+                                childUpdates.put(users, user);
+
+                                childUpdates.put(getString(R.string.dbname_usernames), 1);
+
+                                mDatabase.getReference()
+                                        .updateChildren(childUpdates)
+                                        .addOnSuccessListener(new OnSuccessListener<Void>()
+                                        {
+
+                                            // data successfully stored, continue to Home Activity
+                                            @Override
+                                            public void onSuccess(Void aVoid)
+                                            {
+                                                Intent intent = new Intent(CreateAccountActivity.this, HomeActivity.class);
+                                                startActivity(intent);
+                                                finish();
+                                            }
+                                        })
+                                        .addOnFailureListener(new OnFailureListener()
+                                        {
+                                            @Override
+                                            public void onFailure(@NonNull Exception e)
+                                            {
+                                                currentUser.delete();
+
+                                                mFirstNameView.getText().clear();
+                                                mLastNameView.getText().clear();
+                                                mUsernameView.getText().clear();
+                                                mEmailView.getText().clear();
+                                                mPasswordView.getText().clear();
+
+                                                // Warn the user
+                                                AlertDialog.Builder alert = new AlertDialog.Builder(CreateAccountActivity.this)
+                                                        .setMessage(getString(R.string.error_account_creation));
+
+                                                alert.setPositiveButton("Ok", new DialogInterface.OnClickListener(){
+
+                                                    @Override
+                                                    public void onClick(DialogInterface dialog, int which)
+                                                    {
+                                                        dialog.dismiss();
+                                                    }
+                                                });
+
+                                                final AlertDialog dialog = alert.create();
+                                                dialog.show();
+
+                                                Runnable run = new Runnable()
+                                                {
+                                                    @Override
+                                                    public void run()
+                                                    {
+                                                        if(dialog.isShowing())
+                                                            dialog.dismiss();
+                                                    }
+                                                };
+
+                                                // close the Dialog after 5 seconds
+                                                mCreateAccountFormView.postDelayed(run, DELAY_TIME);
+
+                                            }
+                                        });
+
+
                                 Log.d(TAG, "createUserWithEmail:success");
 
                                 showProgress(false);
@@ -284,18 +374,40 @@ public class CreateAccountActivity extends AppCompatActivity
         }
     }
 
+    /**
+     * Matches the user's Email against a Pattern for a legit email
+     *
+     * @param email to validate
+     * @return true if the Email matches the Pattern, false otherwise
+     */
     private boolean isEmailValid(String email)
     {
-        //TODO: Replace this with your own logic
-        return email.contains("@");
+        return Pattern.matches("^([a-zA-Z0-9_\\-\\.]+)@([a-zA-Z0-9_\\-\\.]+)\\.([a-zA-Z]{2,5})$", email);
     }
 
+    /**
+     * Checks if the password length is >= 8.
+     *
+     * It is assumed that that password is not null or empty.
+     *
+     * @param password
+     * @return True if password length is at least 8, false otherwise
+     */
     private boolean isPasswordValid(String password)
     {
-        //TODO: Replace this with your own logic
-        return password.length() > 4;
+        return password.length() >= MIN_PASS_LEN;
     }
 
+    /**
+     * Validates if the user's first & last name contains alphabetic characters.
+     *
+     * @param name to validate
+     * @return True if full name matches the pattern, false otherwise
+     */
+    private boolean isNameValid(String name)
+    {
+        return(Pattern.matches("[a-zA-Z]+", name));
+    }
 
     /**
      * Shows the progress UI and hides the login form.
@@ -305,15 +417,16 @@ public class CreateAccountActivity extends AppCompatActivity
         // On Honeycomb MR2 we have the ViewPropertyAnimator APIs, which allow
         // for very easy animations. If available, use these APIs to fade-in
         // the progress spinner.
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR2) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR2)
+        {
             int shortAnimTime = getResources().getInteger(android.R.integer.config_shortAnimTime);
 
-            mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
-            mLoginFormView.animate().setDuration(shortAnimTime).alpha(
+            mCreateAccountFormView.setVisibility(show ? View.GONE : View.VISIBLE);
+            mCreateAccountFormView.animate().setDuration(shortAnimTime).alpha(
                     show ? 0 : 1).setListener(new AnimatorListenerAdapter() {
                 @Override
                 public void onAnimationEnd(Animator animation) {
-                    mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
+                    mCreateAccountFormView.setVisibility(show ? View.GONE : View.VISIBLE);
                 }
             });
 
@@ -331,7 +444,7 @@ public class CreateAccountActivity extends AppCompatActivity
             // The ViewPropertyAnimator APIs are not available, so simply show
             // and hide the relevant UI components.
             mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
-            mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
+            mCreateAccountFormView.setVisibility(show ? View.GONE : View.VISIBLE);
         }
     }
 
