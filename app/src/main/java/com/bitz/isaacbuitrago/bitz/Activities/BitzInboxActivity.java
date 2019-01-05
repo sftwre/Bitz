@@ -39,12 +39,12 @@ public class BitzInboxActivity extends AppCompatActivity implements ItemClickLis
 {
 
     // data
-    BitzInboxAdapter mBitzAdapter;
-    List<Bit> bitz;
+    private BitzInboxAdapter mBitzAdapter;
+    private List<Bit> bitz;
 
     // UI references
-    RecyclerView recyclerView;
-    LinearLayout bitzInboxLinearLayout;
+    private RecyclerView recyclerView;
+    private LinearLayout bitzInboxLinearLayout;
 
     // Firbase references
     private DatabaseReference mDatabase;
