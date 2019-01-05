@@ -53,6 +53,10 @@
     <string name="action_delete"> Delete</string>
     <string name="action_send"> Send</string>
 
+    <!-- Integration strings-->
+    <string name="title_connected"> Connected</string>
+
+
     <!-- Firebase Database Strings-->
     <string name="dbname_connections"> connections</string>
     <string name="dbname_friends"> friends</string>
@@ -69,5 +73,6 @@
     <string name="auth_success">Authentication Success</string>
     <string name="title_activity_bitz_inbox">BitzInboxActivity</string>
     <string name="title_activity_replay">ReplayActivity</string>
+    <string name="title_activity_integrations">Integrations</string>
 
 </resources>

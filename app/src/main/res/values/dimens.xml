@@ -6,6 +6,8 @@
     <dimen name="padding_list_row">16dp</dimen>
     <dimen name="messages_padding_left">72dp</dimen>
     <dimen name="messages_padding_right">72dp</dimen>
+    <dimen name="service_padding_right">50dp</dimen>
+    <dimen name="service_padding_left">50dp</dimen>
     <dimen name="icon_width_height">40dp</dimen>
     <dimen name="msg_text_primary">16sp</dimen>
     <dimen name="msg_text_secondary">14sp</dimen>
