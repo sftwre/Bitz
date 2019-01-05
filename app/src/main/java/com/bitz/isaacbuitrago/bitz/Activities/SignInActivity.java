@@ -136,9 +136,7 @@ public class SignInActivity extends AppCompatActivity implements LoaderCallbacks
     {
         super.onStart();
 
-        // obtain reference to authentication system
         mAuth = FirebaseAuth.getInstance();
-
 
         // authenticate the user with Spotify
         spotifyLogin();
@@ -155,7 +153,7 @@ public class SignInActivity extends AppCompatActivity implements LoaderCallbacks
 
 
     /**
-     * Starts the sign in intent
+     * Authenticate user with Spotify
      */
     private void spotifyLogin()
     {
