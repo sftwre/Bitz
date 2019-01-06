@@ -5,12 +5,11 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@drawable/bg_list_row"
     android:paddingTop="@dimen/padding_list_row">
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="68dp"
+        android:layout_height="64dp"
         android:layout_alignParentStart="true"
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
@@ -29,15 +28,16 @@
             android:id="@+id/checkBox"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:text="@string/title_connected" />
+            android:layout_marginTop="16dp"
+            android:text="@string/title_connect"
+            android:textColorLink="@color/colorAppTheme" />
 
         <ImageView
-            android:id="@+id/imageView"
-            android:layout_width="51dp"
-            android:layout_height="38dp"
-            android:layout_marginLeft="140dp"
-            android:layout_marginTop="12dp"
+            android:id="@+id/serviceImageView"
+            android:layout_width="76dp"
+            android:layout_height="58dp"
+            android:layout_marginLeft="100dp"
+            android:layout_marginTop="10dp"
             android:baselineAlignBottom="false"
             app:srcCompat="@drawable/googleg_standard_color_18"
             tools:ignore="contentDescription" />

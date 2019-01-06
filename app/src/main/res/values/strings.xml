@@ -54,6 +54,7 @@
     <string name="action_send"> Send</string>
 
     <!-- Integration strings-->
+    <string name="title_connect"> Connect</string>
     <string name="title_connected"> Connected</string>
 
 
