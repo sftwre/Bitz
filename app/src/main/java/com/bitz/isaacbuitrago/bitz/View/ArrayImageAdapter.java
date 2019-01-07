@@ -10,7 +10,9 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
 import android.widget.ImageView;
+import android.widget.TextView;
 
+import com.bitz.isaacbuitrago.bitz.Model.StreamingService;
 import com.bitz.isaacbuitrago.bitz.R;
 
 import java.util.ArrayList;
@@ -27,12 +29,12 @@ public class ArrayImageAdapter extends ArrayAdapter
 
     private Context mContext;
 
-    private List<Integer> logoList;     // list of resource identifiers for a drawable
+    private List<StreamingService> logoList;     // list of resource identifiers for a drawable
 
     private View.OnClickListener listener;
 
     public ArrayImageAdapter(@NonNull Context context, int resource,
-                             @LayoutRes ArrayList<Integer> objects,
+                             ArrayList<StreamingService> objects,
                              View.OnClickListener listener)
     {
         super(context, resource, objects);
@@ -55,11 +57,15 @@ public class ArrayImageAdapter extends ArrayAdapter
 
         ImageView imageView = listItem.findViewById(R.id.serviceImageView);
 
-        imageView.setImageResource(logoList.get(position));
+        TextView textView = listItem.findViewById(R.id.serviceName);
 
         CheckBox checkBox = listItem.findViewById(R.id.checkBox);
 
+        imageView.setImageResource(logoList.get(position).getImageResourceId());
+
         checkBox.setOnClickListener(listener);
+
+        textView.setText(logoList.get(position).getName());
 
         return listItem;
     }
