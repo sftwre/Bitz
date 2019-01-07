@@ -38,9 +38,19 @@
             android:layout_height="58dp"
             android:layout_marginLeft="100dp"
             android:layout_marginTop="10dp"
+            android:layout_marginBottom="10dp"
             android:baselineAlignBottom="false"
             app:srcCompat="@drawable/googleg_standard_color_18"
             tools:ignore="contentDescription" />
+
+        <TextView
+            android:id="@+id/serviceName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:clickable="false"
+            android:text="TextView"
+            android:visibility="invisible" />
     </LinearLayout>
 
 </RelativeLayout>
