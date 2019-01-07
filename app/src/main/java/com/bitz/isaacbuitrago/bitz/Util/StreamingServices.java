@@ -10,6 +10,6 @@ import com.bitz.isaacbuitrago.bitz.Activities.SignInActivity;
 public final class StreamingServices
 {
 
-    public final String SPOTIFY = "Spotify";
+    public static final String SPOTIFY = "Spotify";
 
 }

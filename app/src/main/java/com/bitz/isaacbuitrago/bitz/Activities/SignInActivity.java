@@ -29,15 +29,11 @@ import android.widget.Toast;
 import java.util.ArrayList;
 import java.util.List;
 import com.bitz.isaacbuitrago.bitz.R;
-import com.bitz.isaacbuitrago.bitz.Util.Properties;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.spotify.sdk.android.authentication.AuthenticationClient;
-import com.spotify.sdk.android.authentication.AuthenticationRequest;
-import com.spotify.sdk.android.authentication.AuthenticationResponse;
 import static android.Manifest.permission.READ_CONTACTS;
 import static android.content.ContentValues.TAG;
 
@@ -142,9 +138,6 @@ public class SignInActivity extends AppCompatActivity implements LoaderCallbacks
         {
             nextActivity();
         }
-
-        // authenticate the user with Spotify
-        //spotifyLogin();
     }
 
 
@@ -153,64 +146,6 @@ public class SignInActivity extends AppCompatActivity implements LoaderCallbacks
     {
         super.onStop();
 
-    }
-
-
-
-    /**
-     * Authenticate user with Spotify
-     */
-    private void spotifyLogin()
-    {
-        AuthenticationRequest.Builder builder =
-                new AuthenticationRequest.Builder(Properties.CLIENT_ID, AuthenticationResponse.Type.TOKEN, Properties.REDIRECT_URI);
-
-        builder.setScopes(new String[]{"streaming"});
-        AuthenticationRequest request = builder.build();
-
-        AuthenticationClient.openLoginActivity(this, REQUEST_CODE, request);
-    }
-
-
-    /**
-     * Receives the authentication result from the Spotify remote
-     *
-     * @param requestCode
-     * @param resultCode
-     * @param intent
-     */
-    protected void onActivityResult(int requestCode, int resultCode, Intent intent)
-    {
-        super.onActivityResult(requestCode, resultCode, intent);
-
-        // Check if result comes userName the correct activity
-        if (requestCode == REQUEST_CODE)
-        {
-            AuthenticationResponse response = AuthenticationClient.getResponse(resultCode, intent);
-
-            switch (response.getType())
-            {
-                // Response was successful and contains auth token
-                case TOKEN:
-
-                    String message = String.format("Received token : %s", response.getCode());
-
-                    Properties.accessToken = response.getAccessToken();
-
-                    Log.i("SignInActivity", message);
-                    break;
-
-                // Auth flow returned an error
-                case ERROR:
-                    Log.e("SignInActivity", response.getError());
-
-                    break;
-
-                // Most likely auth flow was cancelled
-                default:
-                    Log.d("SignInActivity", "Could not authenticate user");
-            }
-        }
     }
 
 
