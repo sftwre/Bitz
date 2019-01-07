@@ -32,7 +32,7 @@
             android:layout_height="wrap_content"
             android:ellipsize="end"
             android:lines="1"
-            android:textColor="@color/from"
+            android:textColor="@color/colorBlack"
             android:textSize="@dimen/msg_text_primary"
             android:textStyle="bold" />
 

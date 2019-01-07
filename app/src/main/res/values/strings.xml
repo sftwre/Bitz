@@ -17,6 +17,8 @@
     </string>
     <string name="title_activity_music_library">MusicLibrary</string>
     <string name="search_hint">Search for a song or artist</string>
+    <string name="title_please_wait"> Please wait...</string>
+
 
     <!-- Strings related to account creation-->
     <string name="prompt_first_name"> First Name</string>

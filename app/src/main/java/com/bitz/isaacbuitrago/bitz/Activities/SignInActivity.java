@@ -16,7 +16,6 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.ContactsContract;
-import android.text.TextUtils;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
@@ -64,8 +63,8 @@ public class SignInActivity extends AppCompatActivity implements LoaderCallbacks
     private EditText mPasswordView;
     private TextView joinNowLink;
     private TextView forgotPassLink;
+    private TextView pleaseWaitTextView;
     private View mProgressView;
-    private View mLoginFormView;
 
     /**
      * Entry point for application
@@ -100,7 +99,7 @@ public class SignInActivity extends AppCompatActivity implements LoaderCallbacks
             }
         });
 
-        Button mEmailSignInButton = (Button) findViewById(R.id.email_sign_in_button);
+        Button mEmailSignInButton = (Button) findViewById(R.id.emailSignInButton);
 
         mEmailSignInButton.setOnClickListener((l) -> attemptLogin());
 
@@ -124,10 +123,10 @@ public class SignInActivity extends AppCompatActivity implements LoaderCallbacks
             // TODO create activity for resetting password
         });
 
-        mLoginFormView = findViewById(R.id.login_form);
 
         mProgressView = findViewById(R.id.progressView);
 
+        pleaseWaitTextView = findViewById(R.id.pleaseWaitTextView);
     }
 
 
@@ -138,8 +137,14 @@ public class SignInActivity extends AppCompatActivity implements LoaderCallbacks
 
         mAuth = FirebaseAuth.getInstance();
 
+        // if user already login, move forward
+        if(mAuth.getCurrentUser() != null)
+        {
+            nextActivity();
+        }
+
         // authenticate the user with Spotify
-        spotifyLogin();
+        //spotifyLogin();
     }
 
 
@@ -237,7 +242,7 @@ public class SignInActivity extends AppCompatActivity implements LoaderCallbacks
                         {
                             requestPermissions(new String[]{READ_CONTACTS}, REQUEST_READ_CONTACTS);
                         }
-                    });
+                    }).show();
         } else {
             requestPermissions(new String[]{READ_CONTACTS}, REQUEST_READ_CONTACTS);
         }
@@ -271,15 +276,15 @@ public class SignInActivity extends AppCompatActivity implements LoaderCallbacks
         mPasswordView.setError(null);
 
         // Store values at the time of the login attempt.
-        String email = mEmailView.getText().toString();
-        String password = mPasswordView.getText().toString();
+        String email = mEmailView.getText().toString().trim();
+        String password = mPasswordView.getText().toString().trim();
 
         boolean cancel = false;
 
         View focusView = null;
 
         // Check for a valid password, if the user entered one.
-        if (TextUtils.isEmpty(password))
+        if (password.isEmpty())
         {
             mPasswordView.setError(getString(R.string.error_invalid_password));
 
@@ -289,7 +294,7 @@ public class SignInActivity extends AppCompatActivity implements LoaderCallbacks
         }
 
         // Check for a valid email address.
-        if (TextUtils.isEmpty(email))
+        if (email.isEmpty())
         {
             mEmailView.setError(getString(R.string.error_field_required));
 
@@ -304,7 +309,8 @@ public class SignInActivity extends AppCompatActivity implements LoaderCallbacks
             // form field with an error.
 
             focusView.requestFocus();
-        } else {
+        } else
+            {
             // Show a progress spinner, and login the user
             showProgress(true);
 
@@ -314,7 +320,7 @@ public class SignInActivity extends AppCompatActivity implements LoaderCallbacks
                         @Override
                         public void onComplete(@NonNull Task<AuthResult> task)
                         {
-                            Log.d(TAG, "signInWithEmail:onComplete:" + task.isSuccessful());
+                            Log.d(TAG, "signInWithEmail successful");
 
                             FirebaseUser user = mAuth.getCurrentUser();
 
@@ -330,20 +336,30 @@ public class SignInActivity extends AppCompatActivity implements LoaderCallbacks
 
                                 mProgressView.setVisibility(View.GONE);
 
+                                pleaseWaitTextView.setVisibility(View.GONE);
                             }
                             else{
                                 Log.d(TAG, "onComplete: success. email is verified.");
 
-                                Intent intent = new Intent(SignInActivity.this, CreateBitActivity.class);
-
-                                startActivity(intent);
-
-                                finish();
+                                nextActivity();
                             }
                         }
 
                     });
         }
+    }
+
+    /**
+     * Consolidates logic for swithcing to the
+     * next activity.
+     */
+    private void nextActivity()
+    {
+        Intent intent = new Intent(SignInActivity.this, IntegrationsActivity.class);
+
+        startActivity(intent);
+
+        finish();
     }
 
     /**
@@ -359,19 +375,7 @@ public class SignInActivity extends AppCompatActivity implements LoaderCallbacks
         {
             int shortAnimTime = getResources().getInteger(android.R.integer.config_shortAnimTime);
 
-            mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
-
-            mLoginFormView
-                    .animate()
-                    .setDuration(shortAnimTime)
-                    .alpha(show ? 0 : 1)
-                    .setListener(new AnimatorListenerAdapter()
-            {
-                @Override
-                public void onAnimationEnd(Animator animation) {
-                    mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
-                }
-            });
+            pleaseWaitTextView.setVisibility(show ? View.VISIBLE: View.GONE);
 
             mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
 
@@ -386,7 +390,8 @@ public class SignInActivity extends AppCompatActivity implements LoaderCallbacks
             // The ViewPropertyAnimator APIs are not available, so simply show
             // and hide the relevant UI components.
             mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
-            mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
+            pleaseWaitTextView.setVisibility(show ? View.VISIBLE: View.GONE);
+
         }
     }
 
