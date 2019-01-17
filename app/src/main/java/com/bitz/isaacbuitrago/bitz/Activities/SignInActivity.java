@@ -290,7 +290,7 @@ public class SignInActivity extends AppCompatActivity implements LoaderCallbacks
      */
     private void nextActivity()
     {
-        Intent intent = new Intent(SignInActivity.this, IntegrationsActivity.class);
+        Intent intent = new Intent(SignInActivity.this, HomeActivity.class);
 
         startActivity(intent);
 
