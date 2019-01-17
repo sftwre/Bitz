@@ -48,10 +48,6 @@
             android:label="@string/title_activity_create" />
         <activity
             android:name=".Activities.HomeActivity"
-            android:label="@string/title_activity_home"
-            android:theme="@style/AppTheme.NoActionBar" />
-        <activity
-            android:name=".Activities.BitzInboxActivity"
             android:label="@string/title_activity_bitz_inbox"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
