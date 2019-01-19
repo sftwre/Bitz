@@ -1,2 +1,2 @@
 # Bitz
-Android app that offers an easier and funner way of recommending music to friends.
+Social music platform that allows you to recommend snippets of a song to friends.
