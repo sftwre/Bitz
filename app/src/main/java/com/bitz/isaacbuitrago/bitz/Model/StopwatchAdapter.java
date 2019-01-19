@@ -12,7 +12,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class StopwatchAdapter
 {
-    private long time;              // total time StopWatch has been running
+    private long time;              // total time StopWatch has been running in nanoseconds
 
     private Stopwatch stopwatch;    // stopwatch to manage
 
@@ -43,7 +43,7 @@ public class StopwatchAdapter
 
     /**
      * Set stopwatch time to position.
-     * Marks the StopWatch as ba
+     * Marks the StopWatch as being interrupted
      *
      * @param position
      */
@@ -62,18 +62,14 @@ public class StopwatchAdapter
 
     /**
      *
-     * @return time the underlying StopWatch has been active
+     * @return time the underlying StopWatch has been active in MILLISECONDS
      */
     public long getTime()
     {
         if(interrupted)
-        {
             time += stopwatch.elapsed(TimeUnit.MILLISECONDS);
-        }
         else
-        {
             time = stopwatch.elapsed(TimeUnit.MILLISECONDS);
-        }
 
         return time;
     }

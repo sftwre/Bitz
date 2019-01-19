@@ -59,7 +59,7 @@ public class HomeActivity extends AppCompatActivity implements ItemClickListener
     {
         super.onCreate(savedInstanceState);
 
-        setContentView(R.layout.activity_bitz_inbox);
+        setContentView(R.layout.activity_home);
 
         Toolbar toolbar = findViewById(R.id.toolbar);
 
@@ -109,6 +109,7 @@ public class HomeActivity extends AppCompatActivity implements ItemClickListener
     {
         super.onStart();
 
+        // fetch Bitz in separate thread
         AsyncTask<Void, Void, Void> task = new AsyncTask<Void, Void, Void>()
         {
             @Override
@@ -140,6 +141,10 @@ public class HomeActivity extends AppCompatActivity implements ItemClickListener
                     {
                         // Collection of Bit id's
                         Map<String, String> bitIds = (HashMap<String, String>) dataSnapshot.getValue();
+
+                        // none for current user
+                        if(bitIds == null)
+                            return;
 
                         // Read Bit from it's path
                         for(String id : bitIds.values())

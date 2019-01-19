@@ -25,6 +25,7 @@ import com.spotify.android.appremote.api.Connector;
 import com.spotify.android.appremote.api.PlayerApi;
 import com.spotify.android.appremote.api.SpotifyAppRemote;
 import com.spotify.protocol.client.Subscription;
+import com.spotify.protocol.types.PlayerContext;
 import com.spotify.protocol.types.PlayerState;
 import com.spotify.protocol.types.Track;
 import com.spotify.sdk.android.authentication.AuthenticationClient;
@@ -32,6 +33,7 @@ import com.spotify.sdk.android.authentication.AuthenticationRequest;
 import com.spotify.sdk.android.authentication.AuthenticationResponse;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Responsible for rendering the image and data of the currently playing
@@ -65,7 +67,9 @@ public class CreateBitActivity extends AppCompatActivity
 
     private static final int  DELAY_TIME = 1000;
 
-    private static final int  PERIOD = 800;
+    private static final int  TIME_STAMPS_UPDATE_PERIOD = 1000;
+
+    private static final int  SEEK_BAR_UPDATE_PERIOD = 800;
 
     private static final int REQUEST_CODE = 1;
 
@@ -196,12 +200,6 @@ public class CreateBitActivity extends AppCompatActivity
 
         timeRemaining = (TextView) findViewById(R.id.timeRemaining);
 
-        // TODO remove
-        // hard code time stamps
-        timePlayed.setText(String.format("0:00"));
-
-        timeRemaining.setText(String.format("1:00"));
-
         albumCover = (ImageView) findViewById(R.id.albumCover);
 
         seekBar = (SeekBar) findViewById(R.id.seekBar);
@@ -279,15 +277,6 @@ public class CreateBitActivity extends AppCompatActivity
         // create the scheduler
         scheduler = new Timer();
 
-        // Authenticate user on Spotify
-        AuthenticationRequest.Builder builder =
-                new AuthenticationRequest.Builder(Properties.CLIENT_ID, AuthenticationResponse.Type.TOKEN, Properties.REDIRECT_URI);
-
-        builder.setScopes(new String[]{"app-remote-control"});
-        AuthenticationRequest request = builder.build();
-
-        AuthenticationClient.openLoginActivity(this, REQUEST_CODE, request);
-
         // Connect to Spotify
         ConnectionParams connectionParams =
                 new ConnectionParams.Builder(Properties.CLIENT_ID)
@@ -295,7 +284,7 @@ public class CreateBitActivity extends AppCompatActivity
                         .showAuthView(true)
                         .build();
 
-
+        // connect to Spotify App remote
         SpotifyAppRemote.CONNECTOR.connect(this, connectionParams,
                 new Connector.ConnectionListener()
                 {
@@ -307,6 +296,9 @@ public class CreateBitActivity extends AppCompatActivity
                         playerApi = mSpotifyAppRemote.getPlayerApi();
 
                         Log.d("MainActivity", "Connected to Spotify");
+
+                        // synchronize timer with current track time
+                        stopwatch.start();
 
                         // start interacting with API
                         spotifyConnected();
@@ -344,12 +336,6 @@ public class CreateBitActivity extends AppCompatActivity
     {
         // play the track
 
-        // TODO create bit on current track
-        playerApi.play("spotify:user:spotify:playlist:37i9dQZF1DX2sUQwD7tbmL");
-
-        // start the stopwatch
-        stopwatch.start();
-
         // Subscribe to PlayerState
         playerApi.subscribeToPlayerState().setEventCallback(new Subscription.EventCallback<PlayerState>()
         {
@@ -370,8 +356,8 @@ public class CreateBitActivity extends AppCompatActivity
 
                     bit.setDirty(true);
 
-                    // download image for the current track
-                    //new DownloadImageTask().execute(track.uri);
+                    // TODO download image for the current track
+                    // new DownloadImageTask().execute(track.uri);
 
                     // set upper range of the progress bar
                     seekBar.setMax((int) track.duration);
@@ -385,7 +371,55 @@ public class CreateBitActivity extends AppCompatActivity
                             changeSeekBar();
                         }
 
-                    }, DELAY_TIME, PERIOD);
+                    }, DELAY_TIME, SEEK_BAR_UPDATE_PERIOD);
+
+                    // update timestamps for time song was played
+                    scheduler.schedule(new TimerTask()
+                    {
+                        @Override
+                        public void run()
+                        {
+                            timePlayed.post(new Runnable()
+                            {
+                                @Override
+                                public void run()
+                                {
+                                    long ms = stopwatch.getTime();  // milliseconds played
+                                    long min = TimeUnit.MILLISECONDS.toMinutes(ms); // minutes played
+                                    long sec = TimeUnit.MILLISECONDS.toSeconds(ms); // seconds played
+
+                                    String time = String.format("%02d:%02d", min, sec - TimeUnit.MINUTES.toSeconds(min));
+
+                                    timePlayed.setText(time);
+                                }
+                            });
+                        }
+                    }, DELAY_TIME, TIME_STAMPS_UPDATE_PERIOD);
+
+                    // update timestamps for time remaining in song
+                    scheduler.schedule(new TimerTask()
+                    {
+                        @Override
+                        public void run()
+                        {
+                            // updatae UI element on main thread
+                            timeRemaining.post(new Runnable()
+                            {
+                                @Override
+                                public void run()
+                                {
+                                    long ms = track.duration - stopwatch.getTime(); // milliseconds remaining
+                                    long min = TimeUnit.MILLISECONDS.toMinutes(ms); // minutes played
+                                    long sec = TimeUnit.MILLISECONDS.toSeconds(ms); // seconds played
+
+                                    String time = String.format("%d:%d", min, sec -  TimeUnit.MINUTES.toSeconds(min));
+
+                                    timeRemaining.setText(time);
+                                }
+                            });
+                        }
+                    }, DELAY_TIME, TIME_STAMPS_UPDATE_PERIOD);
+
 
                     StringBuilder builder = new StringBuilder()
                                     .append("Playing '")
