@@ -21,7 +21,6 @@ public class StopwatchAdapter
     public StopwatchAdapter()
     {
         time = 0;
-
         interrupted = false;
     }
 
@@ -50,13 +49,9 @@ public class StopwatchAdapter
     public void setTime(long position)
     {
         interrupted = true;
-
         stopwatch.stop();
-
         time = position;
-
         stopwatch.reset();
-
         stopwatch.start();
     }
 
@@ -67,7 +62,11 @@ public class StopwatchAdapter
     public long getTime()
     {
         if(interrupted)
+        {
             time += stopwatch.elapsed(TimeUnit.MILLISECONDS);
+            stopwatch.reset();
+            stopwatch.start();
+        }
         else
             time = stopwatch.elapsed(TimeUnit.MILLISECONDS);
 

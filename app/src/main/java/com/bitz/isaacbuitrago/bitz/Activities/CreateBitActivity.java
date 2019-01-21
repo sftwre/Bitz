@@ -14,8 +14,6 @@ import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import com.bitz.isaacbuitrago.bitz.Model.StreamingService;
 import com.bitz.isaacbuitrago.bitz.Util.Properties;
 import com.bitz.isaacbuitrago.bitz.Model.Bit;
 import com.bitz.isaacbuitrago.bitz.Model.BitRecording;
@@ -28,11 +26,9 @@ import com.spotify.android.appremote.api.Connector;
 import com.spotify.android.appremote.api.PlayerApi;
 import com.spotify.android.appremote.api.SpotifyAppRemote;
 import com.spotify.protocol.client.Subscription;
-import com.spotify.protocol.types.PlayerContext;
 import com.spotify.protocol.types.PlayerState;
 import com.spotify.protocol.types.Track;
 import com.spotify.sdk.android.authentication.AuthenticationClient;
-import com.spotify.sdk.android.authentication.AuthenticationRequest;
 import com.spotify.sdk.android.authentication.AuthenticationResponse;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -277,9 +273,6 @@ public class CreateBitActivity extends AppCompatActivity
         // create the StopwatchAdapter
         stopwatch = new StopwatchAdapter();
 
-        // create the scheduler
-        scheduler = new Timer();
-
         // connect to Spotify App remote
         ConnectionParams connectionParams =
                 new ConnectionParams.Builder(Properties.CLIENT_ID)
@@ -332,35 +325,43 @@ public class CreateBitActivity extends AppCompatActivity
      */
     private void spotifyConnected()
     {
-        // play the track
-
         // Subscribe to PlayerState
         playerApi.subscribeToPlayerState().setEventCallback(new Subscription.EventCallback<PlayerState>()
         {
-            // TODO determine how many times this is called
             @Override
             public void onEvent(PlayerState playerState)
             {
                 // first time bit has been modified
-                if (! bit.isDirty())
+                if (! playerState.isPaused)
                 {
                     track = playerState.track;
 
-                    bit.setTrackTitle(track.name);
-                    bit.setArtist(track.artist.name);
-                    bit.setPlatform(StreamingServices.SPOTIFY);
-                    bit.setDirty(true);
+                    // set bit info
+                    if(! bit.isDirty())
+                    {
+                        bit.setTrackTitle(track.name);
+                        bit.setArtist(track.artist.name);
+                        bit.setPlatform(StreamingServices.SPOTIFY);
+                        bit.setTrackUri(playerState.track.uri);
+                        bit.setDirty(true);
+                    }
 
                     // TODO download image on separate thread
                     // new DownloadImageTask().execute(track.uri);
 
                     // set upper range of the progress bar
-                    seekBar.setMax((int) track.duration);
-                    seekBar.setProgress((int) playerState.playbackPosition);
+                    if(seekBar.getMax() != track.duration)
+                    {
+                        seekBar.setMax((int) track.duration);
+                        seekBar.setProgress((int) playerState.playbackPosition);
+                    }
 
                     // synchronize timer with current track time
                     stopwatch.start();
                     stopwatch.setTime(playerState.playbackPosition);
+
+                    // create the scheduler
+                    scheduler = new Timer();
 
                     // update the SeekBar
                     scheduler.schedule(new TimerTask()
@@ -404,6 +405,12 @@ public class CreateBitActivity extends AppCompatActivity
 
                     Log.i("MainActivity", builder.toString());
                 }
+
+                else if (playerState.isPaused)
+                {
+                    scheduler.cancel();
+                    stopwatch.stop();
+                }
             }
 
         });
@@ -420,8 +427,7 @@ public class CreateBitActivity extends AppCompatActivity
     private void changeSeekBar()
     {
         // If the stopwatch has not exceeded track duration, set progress.
-        if(Build.VERSION.SDK_INT >= 21 &&
-                stopwatch.getTime() <= track.duration)
+        if(Build.VERSION.SDK_INT >= 21 && stopwatch.getTime() <= track.duration)
         {
             seekBar.setProgress((int) stopwatch.getTime());
         }
@@ -469,7 +475,7 @@ public class CreateBitActivity extends AppCompatActivity
             long min = TimeUnit.MILLISECONDS.toMinutes(ms); // minutes played
             long sec = TimeUnit.MILLISECONDS.toSeconds(ms); // seconds played
 
-            String time = String.format("%d:%d", min, sec -  TimeUnit.MINUTES.toSeconds(min));
+            String time = String.format("%02d:%02d", min, sec -  TimeUnit.MINUTES.toSeconds(min));
 
             timeRemaining.setText(time);
         };
