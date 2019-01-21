@@ -14,17 +14,21 @@ import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.bitz.isaacbuitrago.bitz.Model.StreamingService;
 import com.bitz.isaacbuitrago.bitz.Util.Properties;
 import com.bitz.isaacbuitrago.bitz.Model.Bit;
 import com.bitz.isaacbuitrago.bitz.Model.BitRecording;
 import com.bitz.isaacbuitrago.bitz.Model.BitStopped;
 import com.bitz.isaacbuitrago.bitz.Model.StopwatchAdapter;
 import com.bitz.isaacbuitrago.bitz.R;
+import com.bitz.isaacbuitrago.bitz.Util.StreamingServices;
 import com.spotify.android.appremote.api.ConnectionParams;
 import com.spotify.android.appremote.api.Connector;
 import com.spotify.android.appremote.api.PlayerApi;
 import com.spotify.android.appremote.api.SpotifyAppRemote;
 import com.spotify.protocol.client.Subscription;
+import com.spotify.protocol.types.PlayerContext;
 import com.spotify.protocol.types.PlayerState;
 import com.spotify.protocol.types.Track;
 import com.spotify.sdk.android.authentication.AuthenticationClient;
@@ -32,6 +36,7 @@ import com.spotify.sdk.android.authentication.AuthenticationRequest;
 import com.spotify.sdk.android.authentication.AuthenticationResponse;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Responsible for rendering the image and data of the currently playing
@@ -65,7 +70,9 @@ public class CreateBitActivity extends AppCompatActivity
 
     private static final int  DELAY_TIME = 1000;
 
-    private static final int  PERIOD = 800;
+    private static final int  TIME_STAMPS_UPDATE_PERIOD = 1000;
+
+    private static final int  SEEK_BAR_UPDATE_PERIOD = 800;
 
     private static final int REQUEST_CODE = 1;
 
@@ -103,7 +110,6 @@ public class CreateBitActivity extends AppCompatActivity
                 case R.id.navigation_bit:
 
                     // change the state of the Bit each time the Disk is tapped
-
                     bit.transitionState();
 
                     Context context = getApplicationContext();
@@ -123,6 +129,9 @@ public class CreateBitActivity extends AppCompatActivity
                     else if(bit.getState() instanceof BitStopped)
                     {
                         bit.setTime(stopwatch.getTime());
+
+                        // go to start time
+                        playerApi.seekTo(bit.getStartTime());
 
                         // pause the player
                         playerApi.pause();
@@ -156,9 +165,9 @@ public class CreateBitActivity extends AppCompatActivity
                     // seek the current track to the position
                     if(fromUser && playerApi != null)
                     {
-                        playerApi.seekTo((long) progress);
-
                         stopwatch.setTime((long) progress);
+
+                        playerApi.seekTo((long) progress);
                     }
                 }
 
@@ -193,12 +202,6 @@ public class CreateBitActivity extends AppCompatActivity
         timePlayed = (TextView) findViewById(R.id.timePlayed);
 
         timeRemaining = (TextView) findViewById(R.id.timeRemaining);
-
-        // TODO remove
-        // hard code time stamps
-        timePlayed.setText(String.format("0:00"));
-
-        timeRemaining.setText(String.format("1:00"));
 
         albumCover = (ImageView) findViewById(R.id.albumCover);
 
@@ -277,22 +280,12 @@ public class CreateBitActivity extends AppCompatActivity
         // create the scheduler
         scheduler = new Timer();
 
-        // Authenticate user on Spotify
-        AuthenticationRequest.Builder builder =
-                new AuthenticationRequest.Builder(Properties.CLIENT_ID, AuthenticationResponse.Type.TOKEN, Properties.REDIRECT_URI);
-
-        builder.setScopes(new String[]{"app-remote-control"});
-        AuthenticationRequest request = builder.build();
-
-        AuthenticationClient.openLoginActivity(this, REQUEST_CODE, request);
-
-        // Connect to Spotify
+        // connect to Spotify App remote
         ConnectionParams connectionParams =
                 new ConnectionParams.Builder(Properties.CLIENT_ID)
                         .setRedirectUri(Properties.REDIRECT_URI)
                         .showAuthView(true)
                         .build();
-
 
         SpotifyAppRemote.CONNECTOR.connect(this, connectionParams,
                 new Connector.ConnectionListener()
@@ -314,13 +307,12 @@ public class CreateBitActivity extends AppCompatActivity
                     public void onFailure(Throwable throwable)
                     {
                         Log.e("MainActivity", throwable.getMessage(), throwable);
-
                     }
                 });
 
 
 
-        Log.i("LoginActivity", "Connected to spotify");
+        Log.i("SignInActivity", "Connected to spotify");
 
     }
 
@@ -341,10 +333,6 @@ public class CreateBitActivity extends AppCompatActivity
     private void spotifyConnected()
     {
         // play the track
-        playerApi.play("spotify:user:spotify:playlist:37i9dQZF1DX2sUQwD7tbmL");
-
-        // start the stopwatch
-        stopwatch.start();
 
         // Subscribe to PlayerState
         playerApi.subscribeToPlayerState().setEventCallback(new Subscription.EventCallback<PlayerState>()
@@ -353,26 +341,28 @@ public class CreateBitActivity extends AppCompatActivity
             @Override
             public void onEvent(PlayerState playerState)
             {
-                // if the bit has not already been modified by callback
+                // first time bit has been modified
                 if (! bit.isDirty())
                 {
                     track = playerState.track;
 
                     bit.setTrackTitle(track.name);
-
-                    bit.setArtist(track.artist.toString());
-
-                    bit.setPlatform("spotify");
-
+                    bit.setArtist(track.artist.name);
+                    bit.setPlatform(StreamingServices.SPOTIFY);
                     bit.setDirty(true);
 
-                    // download image for the current track
-                    //new DownloadImageTask().execute(track.uri);
+                    // TODO download image on separate thread
+                    // new DownloadImageTask().execute(track.uri);
 
                     // set upper range of the progress bar
                     seekBar.setMax((int) track.duration);
+                    seekBar.setProgress((int) playerState.playbackPosition);
 
-                    // schedule task to update the SeekBar
+                    // synchronize timer with current track time
+                    stopwatch.start();
+                    stopwatch.setTime(playerState.playbackPosition);
+
+                    // update the SeekBar
                     scheduler.schedule(new TimerTask()
                     {
                         @Override
@@ -381,7 +371,30 @@ public class CreateBitActivity extends AppCompatActivity
                             changeSeekBar();
                         }
 
-                    }, DELAY_TIME, PERIOD);
+                    }, DELAY_TIME, SEEK_BAR_UPDATE_PERIOD);
+
+                    // update timestamps
+                    scheduler.schedule(new TimerTask()
+                    {
+                        @Override
+                        public void run()
+                        {
+                            // update UI element on main thread
+                            timePlayed.post(changeTimePlayed());
+                        }
+
+                    }, DELAY_TIME, TIME_STAMPS_UPDATE_PERIOD);
+
+                    scheduler.schedule(new TimerTask()
+                    {
+                        @Override
+                        public void run()
+                        {
+                            // update UI element on main thread
+                            timeRemaining.post(changeTimeRemaining());
+                        }
+                    }, DELAY_TIME, TIME_STAMPS_UPDATE_PERIOD);
+
 
                     StringBuilder builder = new StringBuilder()
                                     .append("Playing '")
@@ -406,7 +419,7 @@ public class CreateBitActivity extends AppCompatActivity
      */
     private void changeSeekBar()
     {
-        // If the stopwatch is has not exceeded track duration, set progress.
+        // If the stopwatch has not exceeded track duration, set progress.
         if(Build.VERSION.SDK_INT >= 21 &&
                 stopwatch.getTime() <= track.duration)
         {
@@ -418,6 +431,49 @@ public class CreateBitActivity extends AppCompatActivity
 
             scheduler.cancel();
         }
+    }
+
+    /**
+     *
+     * Updates timestamp for the time
+     * that the current track has been playing.
+     *
+     * @return Runnable to execute on the main thread
+     */
+    private Runnable changeTimePlayed()
+    {
+        return () ->
+        {
+            long ms  = stopwatch.getTime();  // milliseconds played
+            long sec = TimeUnit.MILLISECONDS.toSeconds(ms); // seconds played
+            long min = TimeUnit.MILLISECONDS.toMinutes(ms); // minutes played
+
+            String time = String.format("%02d:%02d", min, sec - TimeUnit.MINUTES.toSeconds(min));
+
+            timePlayed.setText(time);
+        };
+    }
+
+    /**
+     *
+     * Updates timestamp for the time
+     * remaining in the current track.
+     *
+     * @return Runnable to execute on the main thread
+     */
+    private Runnable changeTimeRemaining()
+    {
+        return () ->
+        {
+            long ms = track.duration - stopwatch.getTime(); // milliseconds remaining
+            long min = TimeUnit.MILLISECONDS.toMinutes(ms); // minutes played
+            long sec = TimeUnit.MILLISECONDS.toSeconds(ms); // seconds played
+
+            String time = String.format("%d:%d", min, sec -  TimeUnit.MINUTES.toSeconds(min));
+
+            timeRemaining.setText(time);
+        };
+
     }
 
 }

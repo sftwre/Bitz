@@ -15,8 +15,6 @@ import com.spotify.android.appremote.api.ConnectionParams;
 import com.spotify.android.appremote.api.Connector;
 import com.spotify.android.appremote.api.PlayerApi;
 import com.spotify.android.appremote.api.SpotifyAppRemote;
-import java.time.Duration;
-import java.time.Instant;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -99,7 +97,7 @@ public class VerifyBit extends AppCompatActivity
     @Override
     protected void onStart()
     {
-        // get the Bit passed userName the Music player
+        // get the Bit
         this.bit = (Bit) getIntent().getSerializableExtra("Bit");
 
         // Set Spotify connection parameters
@@ -117,7 +115,7 @@ public class VerifyBit extends AppCompatActivity
                     {
                         mSpotifyAppRemote = spotifyAppRemote;
 
-                        VerifyBit.this.playerApi = mSpotifyAppRemote.getPlayerApi();
+                        playerApi = mSpotifyAppRemote.getPlayerApi();
 
                         verifyBit();
 
@@ -146,7 +144,7 @@ public class VerifyBit extends AppCompatActivity
     }
 
     /**
-     * Starts playing the Bit userName the start time
+     * Replays the Bit for verification
      */
     public void verifyBit()
     {
@@ -163,31 +161,22 @@ public class VerifyBit extends AppCompatActivity
         // TODO remove
         if(Build.VERSION.SDK_INT >= 26)
         {
-            Instant start = Instant.now();
-
             // schedule task to stop player after wait time
-            ScheduledFuture<?> handler = scheduler.schedule(() ->
-                    {
-                        playerApi.pause();
-
-                        Instant finish = Instant.now();
-
-                        long timeElapsed = Duration.between(start, finish).toMillis();
-
-                        String message = String.format("TimeElapsed : %d, WaitTime: %d", timeElapsed, waitTime);
-
-                        Log.i("VerifyBit", message);
-                    }
-                    , waitTime, TimeUnit.MILLISECONDS);
-
-            scheduler.schedule(() -> handler.cancel(false), waitTime, TimeUnit.MILLISECONDS);
+            ScheduledFuture<?> handler = scheduler.schedule(new Runnable() {
+                @Override
+                public void run()
+                {
+                    playerApi.pause();
+                }} , waitTime, TimeUnit.MILLISECONDS);
         }
 
-        // play track userName start time
-        playerApi.seekTo(startTime);
 
-        // resume player
+        playerApi.seekTo(0);
+
         playerApi.resume();
+
+        // seek to start of Bit
+        playerApi.seekTo(startTime);
     }
 
 

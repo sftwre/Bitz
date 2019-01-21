@@ -183,7 +183,6 @@ public class SendBitActivity extends AppCompatActivity implements ItemClickListe
             {
                 // This method is called once with the initial value and again
                 // whenever data at this location is updated.
-
                 friendsList.clear();
 
                 Map<String, Boolean> map = (Map<String, Boolean>) dataSnapshot.getValue();
@@ -250,7 +249,9 @@ public class SendBitActivity extends AppCompatActivity implements ItemClickListe
     }
 
     /**
-     * Stores the Bit in the Database, sends it to each listed recipient,
+     *
+     * Stores the Bit in the Database,
+     * sends it to each listed recipient,
      * and closes the BottomNavigationView.
      *
      */
@@ -258,26 +259,35 @@ public class SendBitActivity extends AppCompatActivity implements ItemClickListe
     {
         final String bitzPath;
 
-//        Bit b = new Bit();
-//
-//        b.setTrackTitle("New York groove");
-//        b.setPlatform("Spotify");
-//        b.setArtist("Kiss");
-//        b.setSendingUser(sendingUser.getUid());
-//        b.setStartTime(12345);
-//        b.setEndTime(123456);
-//        b.setCoverImageUrl("www.google.com");
-//        b.setDateCreated(LocalDateTime.now());
-
         // create a new Bit in the database
         String bitId = mFriendsReference.child(getString(R.string.dbname_bitz)).push().getKey();
 
-        bit.setBitId(bitId);
+        String name = sendingUser.getDisplayName();
 
         bitzPath = String.format("/%s/%s", getString(R.string.dbname_bitz), bitId);
 
-        // store Bit in the Database
-        mFriendsReference.child(bitzPath).setValue(bit);
+        // set the user name of the sender
+        mFriendsReference
+                .child(getString(R.string.dbname_users))
+                .child(sendingUser.getUid())
+                .child(getString(R.string.dbname_username))
+                .addListenerForSingleValueEvent(new ValueEventListener()
+                {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot)
+                    {
+                        // store Bit in the Database
+                        bit.setSendingUserName((String) dataSnapshot.getValue());
+                        bit.setBitId(bitId);
+                        mFriendsReference.child(bitzPath).setValue(bit);
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError)
+                    {
+
+                    }
+                });
 
         // update inbox for each recipient so they have the id of Bit sent to them
         Map<String, Object> childUpdates = new HashMap<String, Object>();
@@ -294,10 +304,9 @@ public class SendBitActivity extends AppCompatActivity implements ItemClickListe
 
         mFriendsReference.updateChildren(childUpdates);
 
-        // hide the bottom navigation view
+        // hide the bottom navigation view and transition to the HomeActivity
         recipientsNavigationView.setVisibility(View.INVISIBLE);
 
-        // TODO transition to another activity
         Intent intent = new Intent(SendBitActivity.this, HomeActivity.class);
 
         startActivity(intent);
@@ -344,7 +353,7 @@ public class SendBitActivity extends AppCompatActivity implements ItemClickListe
         {
             Log.d(TAG, "checkCurrentUser: Opening Login Activity");
 
-            Intent intent = new Intent(SendBitActivity.this, LoginActivity.class);
+            Intent intent = new Intent(SendBitActivity.this, SignInActivity.class);
 
             startActivity(intent);
 

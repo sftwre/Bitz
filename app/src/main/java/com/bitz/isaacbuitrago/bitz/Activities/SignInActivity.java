@@ -16,7 +16,6 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.ContactsContract;
-import android.text.TextUtils;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
@@ -30,15 +29,11 @@ import android.widget.Toast;
 import java.util.ArrayList;
 import java.util.List;
 import com.bitz.isaacbuitrago.bitz.R;
-import com.bitz.isaacbuitrago.bitz.Util.Properties;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.spotify.sdk.android.authentication.AuthenticationClient;
-import com.spotify.sdk.android.authentication.AuthenticationRequest;
-import com.spotify.sdk.android.authentication.AuthenticationResponse;
 import static android.Manifest.permission.READ_CONTACTS;
 import static android.content.ContentValues.TAG;
 
@@ -47,7 +42,7 @@ import static android.content.ContentValues.TAG;
  *
  * @author isaacbuitrago
  */
-public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<Cursor>
+public class SignInActivity extends AppCompatActivity implements LoaderCallbacks<Cursor>
 {
 
     /**
@@ -62,9 +57,10 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     // UI references.
     private AutoCompleteTextView mEmailView;
     private EditText mPasswordView;
-    private TextView registerLink;
+    private TextView joinNowLink;
+    private TextView forgotPassLink;
+    private TextView pleaseWaitTextView;
     private View mProgressView;
-    private View mLoginFormView;
 
     /**
      * Entry point for application
@@ -76,7 +72,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     {
         super.onCreate(savedInstanceState);
 
-        setContentView(R.layout.activity_login);
+        setContentView(R.layout.activity_sign_in);
 
         // Set up the login form.
         mEmailView = (AutoCompleteTextView) findViewById(R.id.loginEmail);
@@ -99,26 +95,34 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             }
         });
 
-        Button mEmailSignInButton = (Button) findViewById(R.id.email_sign_in_button);
+        Button mEmailSignInButton = (Button) findViewById(R.id.emailSignInButton);
 
         mEmailSignInButton.setOnClickListener((l) -> attemptLogin());
 
-        registerLink = findViewById(R.id.registerLink);
+        joinNowLink = findViewById(R.id.joinNowLink);
 
-        registerLink.setOnClickListener((l) -> {
-
-            Intent intent = new Intent(LoginActivity.this, CreateAccountActivity.class);
+        // set on click listener
+        joinNowLink.setOnClickListener((l) ->
+        {
+            Intent intent = new Intent(SignInActivity.this, CreateAccountActivity.class);
 
             startActivity(intent);
 
             finish();
-
         });
 
-        mLoginFormView = findViewById(R.id.login_form);
+        forgotPassLink = findViewById(R.id.forgotPasswordLink);
+
+        // set on click listener
+        forgotPassLink.setOnClickListener((l) ->
+        {
+            // TODO create activity for resetting password
+        });
+
 
         mProgressView = findViewById(R.id.progressView);
 
+        pleaseWaitTextView = findViewById(R.id.pleaseWaitTextView);
     }
 
 
@@ -127,12 +131,11 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     {
         super.onStart();
 
-        // obtain reference to authentication system
         mAuth = FirebaseAuth.getInstance();
 
-
-        // authenticate the user with Spotify
-        spotifyLogin();
+//        // if user already login, move forward
+//        if( mAuth.getCurrentUser() != null)
+//            nextActivity();
     }
 
 
@@ -141,64 +144,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     {
         super.onStop();
 
-    }
-
-
-
-    /**
-     * Starts the sign in intent
-     */
-    private void spotifyLogin()
-    {
-        AuthenticationRequest.Builder builder =
-                new AuthenticationRequest.Builder(Properties.CLIENT_ID, AuthenticationResponse.Type.TOKEN, Properties.REDIRECT_URI);
-
-        builder.setScopes(new String[]{"streaming"});
-        AuthenticationRequest request = builder.build();
-
-        AuthenticationClient.openLoginActivity(this, REQUEST_CODE, request);
-    }
-
-
-    /**
-     * Receives the authentication result from the Spotify remote
-     *
-     * @param requestCode
-     * @param resultCode
-     * @param intent
-     */
-    protected void onActivityResult(int requestCode, int resultCode, Intent intent)
-    {
-        super.onActivityResult(requestCode, resultCode, intent);
-
-        // Check if result comes userName the correct activity
-        if (requestCode == REQUEST_CODE)
-        {
-            AuthenticationResponse response = AuthenticationClient.getResponse(resultCode, intent);
-
-            switch (response.getType())
-            {
-                // Response was successful and contains auth token
-                case TOKEN:
-
-                    String message = String.format("Recieved token : %s", response.getCode());
-
-                    Properties.accessToken = response.getAccessToken();
-
-                    Log.i("LoginActivity", message);
-                    break;
-
-                // Auth flow returned an error
-                case ERROR:
-                    Log.e("LoginActivity", response.getError());
-
-                    break;
-
-                // Most likely auth flow was cancelled
-                default:
-                    Log.d("LoginActivity", response.getState());
-            }
-        }
     }
 
 
@@ -219,15 +164,18 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         if (checkSelfPermission(READ_CONTACTS) == PackageManager.PERMISSION_GRANTED) {
             return true;
         }
-        if (shouldShowRequestPermissionRationale(READ_CONTACTS)) {
+        if (shouldShowRequestPermissionRationale(READ_CONTACTS))
+        {
             Snackbar.make(mEmailView, R.string.permission_rationale, Snackbar.LENGTH_INDEFINITE)
-                    .setAction(android.R.string.ok, new View.OnClickListener() {
+                    .setAction(android.R.string.ok, new View.OnClickListener()
+                    {
                         @Override
                         @TargetApi(Build.VERSION_CODES.M)
-                        public void onClick(View v) {
+                        public void onClick(View v)
+                        {
                             requestPermissions(new String[]{READ_CONTACTS}, REQUEST_READ_CONTACTS);
                         }
-                    });
+                    }).show();
         } else {
             requestPermissions(new String[]{READ_CONTACTS}, REQUEST_READ_CONTACTS);
         }
@@ -261,15 +209,15 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         mPasswordView.setError(null);
 
         // Store values at the time of the login attempt.
-        String email = mEmailView.getText().toString();
-        String password = mPasswordView.getText().toString();
+        String email = mEmailView.getText().toString().trim();
+        String password = mPasswordView.getText().toString().trim();
 
         boolean cancel = false;
 
         View focusView = null;
 
         // Check for a valid password, if the user entered one.
-        if (TextUtils.isEmpty(password))
+        if (password.isEmpty())
         {
             mPasswordView.setError(getString(R.string.error_invalid_password));
 
@@ -279,7 +227,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         }
 
         // Check for a valid email address.
-        if (TextUtils.isEmpty(email))
+        if (email.isEmpty())
         {
             mEmailView.setError(getString(R.string.error_field_required));
 
@@ -294,17 +242,18 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             // form field with an error.
 
             focusView.requestFocus();
-        } else {
+        } else
+            {
             // Show a progress spinner, and login the user
             showProgress(true);
 
             mAuth.signInWithEmailAndPassword(email, password)
-                    .addOnCompleteListener(LoginActivity.this, new OnCompleteListener<AuthResult>()
+                    .addOnCompleteListener(SignInActivity.this, new OnCompleteListener<AuthResult>()
                     {
                         @Override
                         public void onComplete(@NonNull Task<AuthResult> task)
                         {
-                            Log.d(TAG, "signInWithEmail:onComplete:" + task.isSuccessful());
+                            Log.d(TAG, "signInWithEmail successful");
 
                             FirebaseUser user = mAuth.getCurrentUser();
 
@@ -315,25 +264,35 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                             {
                                 Log.w(TAG, "signInWithEmail:failed", task.getException());
 
-                                Toast.makeText(LoginActivity.this, getString(R.string.auth_failed),
+                                Toast.makeText(SignInActivity.this, getString(R.string.auth_failed),
                                         Toast.LENGTH_SHORT).show();
 
                                 mProgressView.setVisibility(View.GONE);
 
+                                pleaseWaitTextView.setVisibility(View.GONE);
                             }
                             else{
                                 Log.d(TAG, "onComplete: success. email is verified.");
 
-                                Intent intent = new Intent(LoginActivity.this, BitzInboxActivity.class);
-
-                                startActivity(intent);
-
-                                finish();
+                                nextActivity();
                             }
                         }
 
                     });
         }
+    }
+
+    /**
+     * Consolidates logic for swithcing to the
+     * next activity.
+     */
+    private void nextActivity()
+    {
+        Intent intent = new Intent(SignInActivity.this, HomeActivity.class);
+
+        startActivity(intent);
+
+        finish();
     }
 
     /**
@@ -349,19 +308,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         {
             int shortAnimTime = getResources().getInteger(android.R.integer.config_shortAnimTime);
 
-            mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
-
-            mLoginFormView
-                    .animate()
-                    .setDuration(shortAnimTime)
-                    .alpha(show ? 0 : 1)
-                    .setListener(new AnimatorListenerAdapter()
-            {
-                @Override
-                public void onAnimationEnd(Animator animation) {
-                    mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
-                }
-            });
+            pleaseWaitTextView.setVisibility(show ? View.VISIBLE: View.GONE);
 
             mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
 
@@ -376,7 +323,8 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             // The ViewPropertyAnimator APIs are not available, so simply show
             // and hide the relevant UI components.
             mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
-            mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
+            pleaseWaitTextView.setVisibility(show ? View.VISIBLE: View.GONE);
+
         }
     }
 
@@ -419,7 +367,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     {
         //Create adapter to tell the AutoCompleteTextView what to show in its dropdown list.
         ArrayAdapter<String> adapter =
-                new ArrayAdapter<>(LoginActivity.this,
+                new ArrayAdapter<>(SignInActivity.this,
                         android.R.layout.simple_dropdown_item_1line, emailAddressCollection);
 
         mEmailView.setAdapter(adapter);

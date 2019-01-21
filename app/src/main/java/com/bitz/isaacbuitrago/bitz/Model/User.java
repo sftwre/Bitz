@@ -19,7 +19,6 @@ public class User
 
     private String email;
 
-    private String password;
 
     public User(String firstName, String lastName, String username)
     {
@@ -88,11 +87,4 @@ public class User
         this.email = email;
     }
 
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
 }

@@ -29,7 +29,7 @@ public class Bit implements Serializable
 
     private String bitId;               // unique id of a Bit
 
-    private String sendingUser;         // username of sender
+    private String sendingUserName;     // username of sender
 
     private String coverImageUrl;       // URL of album cover for Track
 
@@ -98,11 +98,6 @@ public class Bit implements Serializable
         if((states.get("BitRecording")) == null)
         {
             states.put("BitRecording", new BitRecording());
-        }
-
-        if((states.get("BitPlaying")) == null)
-        {
-            states.put("BitPlaying", new BitRecording());
         }
     }
 
@@ -182,7 +177,8 @@ public class Bit implements Serializable
         this.dirty = dirty;
     }
 
-    public LocalDateTime getDateCreated() {
+    public LocalDateTime getDateCreated()
+    {
         return dateCreated;
     }
 
@@ -198,12 +194,12 @@ public class Bit implements Serializable
         this.bitId = bitId;
     }
 
-    public String getSendingUser() {
-        return sendingUser;
+    public String getSendingUserName() {
+        return sendingUserName;
     }
 
-    public void setSendingUser(String sendingUser) {
-        this.sendingUser = sendingUser;
+    public void setSendingUserName(String sendingUserName) {
+        this.sendingUserName = sendingUserName;
     }
 
     @Exclude
