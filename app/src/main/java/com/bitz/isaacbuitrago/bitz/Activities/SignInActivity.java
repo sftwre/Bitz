@@ -133,11 +133,9 @@ public class SignInActivity extends AppCompatActivity implements LoaderCallbacks
 
         mAuth = FirebaseAuth.getInstance();
 
-        // if user already login, move forward
-        if(mAuth.getCurrentUser() != null)
-        {
-            nextActivity();
-        }
+//        // if user already login, move forward
+//        if( mAuth.getCurrentUser() != null)
+//            nextActivity();
     }
 
 
