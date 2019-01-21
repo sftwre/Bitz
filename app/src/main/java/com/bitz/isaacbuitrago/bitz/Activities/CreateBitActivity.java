@@ -14,12 +14,15 @@ import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.bitz.isaacbuitrago.bitz.Model.StreamingService;
 import com.bitz.isaacbuitrago.bitz.Util.Properties;
 import com.bitz.isaacbuitrago.bitz.Model.Bit;
 import com.bitz.isaacbuitrago.bitz.Model.BitRecording;
 import com.bitz.isaacbuitrago.bitz.Model.BitStopped;
 import com.bitz.isaacbuitrago.bitz.Model.StopwatchAdapter;
 import com.bitz.isaacbuitrago.bitz.R;
+import com.bitz.isaacbuitrago.bitz.Util.StreamingServices;
 import com.spotify.android.appremote.api.ConnectionParams;
 import com.spotify.android.appremote.api.Connector;
 import com.spotify.android.appremote.api.PlayerApi;
@@ -277,14 +280,13 @@ public class CreateBitActivity extends AppCompatActivity
         // create the scheduler
         scheduler = new Timer();
 
-        // Connect to Spotify
+        // connect to Spotify App remote
         ConnectionParams connectionParams =
                 new ConnectionParams.Builder(Properties.CLIENT_ID)
                         .setRedirectUri(Properties.REDIRECT_URI)
                         .showAuthView(true)
                         .build();
 
-        // connect to Spotify App remote
         SpotifyAppRemote.CONNECTOR.connect(this, connectionParams,
                 new Connector.ConnectionListener()
                 {
@@ -297,9 +299,6 @@ public class CreateBitActivity extends AppCompatActivity
 
                         Log.d("MainActivity", "Connected to Spotify");
 
-                        // synchronize timer with current track time
-                        stopwatch.start();
-
                         // start interacting with API
                         spotifyConnected();
                     }
@@ -308,7 +307,6 @@ public class CreateBitActivity extends AppCompatActivity
                     public void onFailure(Throwable throwable)
                     {
                         Log.e("MainActivity", throwable.getMessage(), throwable);
-
                     }
                 });
 
@@ -343,26 +341,28 @@ public class CreateBitActivity extends AppCompatActivity
             @Override
             public void onEvent(PlayerState playerState)
             {
-                // if the bit has not already been modified by callback
+                // first time bit has been modified
                 if (! bit.isDirty())
                 {
                     track = playerState.track;
 
                     bit.setTrackTitle(track.name);
-
                     bit.setArtist(track.artist.name);
-
-                    bit.setPlatform("spotify");
-
+                    bit.setPlatform(StreamingServices.SPOTIFY);
                     bit.setDirty(true);
 
-                    // TODO download image for the current track
+                    // TODO download image on separate thread
                     // new DownloadImageTask().execute(track.uri);
 
                     // set upper range of the progress bar
                     seekBar.setMax((int) track.duration);
+                    seekBar.setProgress((int) playerState.playbackPosition);
 
-                    // schedule task to update the SeekBar
+                    // synchronize timer with current track time
+                    stopwatch.start();
+                    stopwatch.setTime(playerState.playbackPosition);
+
+                    // update the SeekBar
                     scheduler.schedule(new TimerTask()
                     {
                         @Override
@@ -373,50 +373,25 @@ public class CreateBitActivity extends AppCompatActivity
 
                     }, DELAY_TIME, SEEK_BAR_UPDATE_PERIOD);
 
-                    // update timestamps for time song was played
+                    // update timestamps
                     scheduler.schedule(new TimerTask()
                     {
                         @Override
                         public void run()
                         {
-                            timePlayed.post(new Runnable()
-                            {
-                                @Override
-                                public void run()
-                                {
-                                    long ms = stopwatch.getTime();  // milliseconds played
-                                    long min = TimeUnit.MILLISECONDS.toMinutes(ms); // minutes played
-                                    long sec = TimeUnit.MILLISECONDS.toSeconds(ms); // seconds played
-
-                                    String time = String.format("%02d:%02d", min, sec - TimeUnit.MINUTES.toSeconds(min));
-
-                                    timePlayed.setText(time);
-                                }
-                            });
+                            // update UI element on main thread
+                            timePlayed.post(changeTimePlayed());
                         }
+
                     }, DELAY_TIME, TIME_STAMPS_UPDATE_PERIOD);
 
-                    // update timestamps for time remaining in song
                     scheduler.schedule(new TimerTask()
                     {
                         @Override
                         public void run()
                         {
-                            // updatae UI element on main thread
-                            timeRemaining.post(new Runnable()
-                            {
-                                @Override
-                                public void run()
-                                {
-                                    long ms = track.duration - stopwatch.getTime(); // milliseconds remaining
-                                    long min = TimeUnit.MILLISECONDS.toMinutes(ms); // minutes played
-                                    long sec = TimeUnit.MILLISECONDS.toSeconds(ms); // seconds played
-
-                                    String time = String.format("%d:%d", min, sec -  TimeUnit.MINUTES.toSeconds(min));
-
-                                    timeRemaining.setText(time);
-                                }
-                            });
+                            // update UI element on main thread
+                            timeRemaining.post(changeTimeRemaining());
                         }
                     }, DELAY_TIME, TIME_STAMPS_UPDATE_PERIOD);
 
@@ -456,6 +431,49 @@ public class CreateBitActivity extends AppCompatActivity
 
             scheduler.cancel();
         }
+    }
+
+    /**
+     *
+     * Updates timestamp for the time
+     * that the current track has been playing.
+     *
+     * @return Runnable to execute on the main thread
+     */
+    private Runnable changeTimePlayed()
+    {
+        return () ->
+        {
+            long ms  = stopwatch.getTime();  // milliseconds played
+            long sec = TimeUnit.MILLISECONDS.toSeconds(ms); // seconds played
+            long min = TimeUnit.MILLISECONDS.toMinutes(ms); // minutes played
+
+            String time = String.format("%02d:%02d", min, sec - TimeUnit.MINUTES.toSeconds(min));
+
+            timePlayed.setText(time);
+        };
+    }
+
+    /**
+     *
+     * Updates timestamp for the time
+     * remaining in the current track.
+     *
+     * @return Runnable to execute on the main thread
+     */
+    private Runnable changeTimeRemaining()
+    {
+        return () ->
+        {
+            long ms = track.duration - stopwatch.getTime(); // milliseconds remaining
+            long min = TimeUnit.MILLISECONDS.toMinutes(ms); // minutes played
+            long sec = TimeUnit.MILLISECONDS.toSeconds(ms); // seconds played
+
+            String time = String.format("%d:%d", min, sec -  TimeUnit.MINUTES.toSeconds(min));
+
+            timeRemaining.setText(time);
+        };
+
     }
 
 }
